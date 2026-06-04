@@ -22,6 +22,8 @@ logs/
 structure.txt
 *.tar.gz
 
+changelog.md
+
 # NOTE ON STRATEGY ENGINE PRIVACY
 # For the interview deployment this repository is kept PRIVATE, so the
 # engine/ and managers/ folders are committed and deploy normally.
