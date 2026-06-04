@@ -22,7 +22,7 @@ logs/
 structure.txt
 *.tar.gz
 
-changelog.md
+DEV_NOTES.md
 
 # NOTE ON STRATEGY ENGINE PRIVACY
 # For the interview deployment this repository is kept PRIVATE, so the
