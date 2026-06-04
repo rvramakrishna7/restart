@@ -1,0 +1,166 @@
+/* ================= PAYOFF WRAPPER ================= */
+
+.payoff-wrapper {
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid #e8edf4;
+  border-radius: 16px;
+  padding: 24px 24px 20px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+/* ================= TOP ROW: TITLE + METRICS ================= */
+
+.payoff-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.payoff-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+/* ================= METRICS ROW (right side of header) ================= */
+
+.payoff-metrics {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* each metric div: "POP: <span>50.6%</span>" */
+.payoff-metrics > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.payoff-metrics > div span {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* ── color classes used directly in JSX ── */
+.payoff-metrics .green,
+.green {
+  color: #059669 !important;
+  font-weight: 700;
+}
+
+.payoff-metrics .red,
+.red {
+  color: #dc2626 !important;
+  font-weight: 700;
+}
+
+/* ── optional pill class (used in future or custom renders) ── */
+.metric-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e8edf2;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.metric-pill strong { font-weight: 700; color: #1e293b; }
+.metric-pill.profit strong { color: #059669; }
+.metric-pill.loss   strong { color: #dc2626; }
+.metric-pill.neutral strong { color: #d97706; }
+
+/* ================= CHART AREA ================= */
+
+.payoff-chart {
+  width: 100%;
+  height: 340px;
+}
+
+/* recharts container border-radius clip */
+.payoff-wrapper .recharts-responsive-container {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* lighter grid lines */
+.payoff-wrapper .recharts-cartesian-grid-horizontal line,
+.payoff-wrapper .recharts-cartesian-grid-vertical line {
+  stroke: #f1f5f9;
+  stroke-dasharray: 4 4;
+}
+
+/* axis text */
+.payoff-wrapper .recharts-xAxis .recharts-cartesian-axis-tick-value,
+.payoff-wrapper .recharts-yAxis .recharts-cartesian-axis-tick-value {
+  font-size: 11px;
+  fill: #94a3b8;
+  font-family: inherit;
+}
+
+/* tooltip */
+.payoff-wrapper .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12) !important;
+  font-size: 12.5px !important;
+  padding: 10px 14px !important;
+}
+
+.payoff-wrapper .recharts-tooltip-label {
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin-bottom: 4px !important;
+}
+
+.payoff-wrapper .recharts-tooltip-item {
+  font-size: 12px !important;
+  color: #475569 !important;
+}
+
+/* ================= BOTTOM ROW: BE + MARGIN ================= */
+
+.payoff-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payoff-bottom > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.payoff-bottom span {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 13px;
+}

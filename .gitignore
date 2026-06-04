@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment files (never commit real secrets)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+build/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# OS / editor
+.DS_Store
+
+# Local scratch files
+structure.txt
+*.tar.gz
+
+# NOTE ON STRATEGY ENGINE PRIVACY
+# For the interview deployment this repository is kept PRIVATE, so the
+# engine/ and managers/ folders are committed and deploy normally.
+# If this repo is ever made PUBLIC, uncomment the two lines below and
+# copy those folders to the server manually (e.g. via scp) instead.
+# engine/
+# managers/

@@ -1,0 +1,177 @@
+/* ================= AUTH PAGE ================= */
+
+.auth-clean {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f0f4f8;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle grid pattern background */
+.auth-clean::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+/* Radial fade over grid */
+.auth-clean::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, #f0f4f8 100%);
+  pointer-events: none;
+}
+
+/* ================= AUTH BOX ================= */
+
+.auth-box-clean {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  background: white;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+  padding: 38px 36px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.8) inset,
+    0 4px 6px rgba(15, 23, 42, 0.04),
+    0 20px 48px rgba(15, 23, 42, 0.08);
+}
+
+.auth-box-clean * {
+  box-sizing: border-box;
+}
+
+/* Logo mark */
+.auth-logo-mark {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 12px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.auth-box-clean h2 {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.auth-box-clean .auth-sub {
+  text-align: center;
+  font-size: 13.5px;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+
+/* ================= FORM ================= */
+
+.auth-field {
+  margin-bottom: 14px;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.auth-box-clean input {
+  width: 100%;
+  display: block;
+  padding: 12px 14px;
+  border-radius: 11px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.auth-box-clean input::placeholder {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.auth-box-clean input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.auth-box-clean .primary-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
+.auth-box-clean .secondary-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.auth-box-clean .secondary-btn:hover {
+  color: #2563eb;
+  background: #f0f7ff;
+}
+
+/* ================= DIVIDER ================= */
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #f1f5f9;
+}

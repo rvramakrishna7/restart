@@ -1,0 +1,11 @@
+@import "./styles/global.css";
+@import "./styles/navbar.css";
+@import "./styles/dashboard.css";
+@import "./styles/strategy.css";
+@import "./styles/execution.css";
+@import "./styles/payoff.css";
+@import "./styles/auth.css";
+@import "./styles/landing.css";
+@import "./styles/analytics.css";
+@import "./styles/brokeraccess.css";
+@import "./styles/responsive.css";

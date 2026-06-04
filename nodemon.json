@@ -1,0 +1,5 @@
+{
+  "watch": ["engine", "services", "strategy", "api", "managers"],
+  "ignore": ["node_modules"],
+  "ext": "js"
+}

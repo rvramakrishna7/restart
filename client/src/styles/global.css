@@ -1,0 +1,198 @@
+/* ================= GLOBAL ================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: #f0f4f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #0f172a;
+}
+
+/* ================= BUTTONS ================= */
+
+.primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25), 0 4px 12px rgba(37, 99, 235, 0.2);
+  transition: all 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3), 0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+.secondary-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #374151;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.secondary-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #f0f7ff;
+}
+
+/* ================= TABLE ================= */
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.table th {
+  text-align: left;
+  padding: 13px 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  background: #fafbfc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table td {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: #1e293b;
+  border-bottom: 1px solid #f8fafc;
+  font-weight: 450;
+}
+
+.table tbody tr {
+  transition: background 0.14s ease;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+.table.enhanced th {
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.table.enhanced td {
+  vertical-align: middle;
+}
+
+/* ================= P&L COLORS ================= */
+
+.buy  { color: #059669; font-weight: 600; }
+.sell { color: #dc2626; font-weight: 600; }
+
+.profit {
+  color: #059669;
+  font-weight: 700;
+}
+
+.loss {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.green { color: #059669; font-weight: 600; }
+.red   { color: #dc2626; font-weight: 600; }
+
+/* ================= DOT ================= */
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot.green { background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
+.dot.red   { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15); }
+
+/* ================= METRIC PILL ================= */
+
+.metric {
+  background: #f8fafc;
+  border: 1px solid #e8edf2;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ================= SCROLLBAR ================= */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .kpi-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .kpi-card {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .analytics-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-body {
+    height: 240px;
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "env": { "node": true, "es2021": true, "jest": true },
+  "parserOptions": { "ecmaVersion": "latest", "sourceType": "script" },
+  "extends": ["eslint:recommended", "prettier"],
+  "ignorePatterns": ["node_modules/", "client/", "coverage/"],
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_|^next$|^req$|^res$" }],
+    "no-constant-condition": ["error", { "checkLoops": false }],
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-console": "off",
+    "no-inner-declarations": "warn"
+  }
+}
