@@ -169,8 +169,9 @@ exports.exitAll = async (req, res) => {
           positions = positions.filter((p) => p.strategyType === filterType);
         }
       }
-
+      const mgr = require("../../managers/positionManagerInstance");
       for (const p of positions) {
+        await mgr.recordClosedTrade(p, "EXIT_ALL");
         p.buyQty = 0;
         p.sellQty = 0;
         p.isClosed = true;
@@ -182,7 +183,7 @@ exports.exitAll = async (req, res) => {
           });
       }
       // ── purge all closed positions from in-memory array ──
-      const mgr = require("../../managers/positionManagerInstance");
+      
       mgr.positions = mgr.positions.filter((p) => !p.isClosed);
       logger.log(
         `🧹 Exit All: memory cleared, ${mgr.positions.length} position(s) remain`,
@@ -339,25 +340,31 @@ exports.exitSingle = async (req, res) => {
       for (const p of positions) {
         // skip already fully closed positions
         if (p.isClosed) continue;
-        
+
         // ── IRON FLY: close only matched leg, mark position closed when all legs closed ──
         if (p.strategyType === "IRON_FLY") {
           const allLegs = [
-            p.if_ceSell, p.if_peSell, p.if_ceBuy, p.if_peBuy,
+            p.if_ceSell,
+            p.if_peSell,
+            p.if_ceBuy,
+            p.if_peBuy,
             ...(p.if_bwLegs || []),
           ];
           const matched = allLegs.find(
-            (l) => l && !l.closed && l.symbol === symbol
+            (l) => l && !l.closed && l.symbol === symbol,
           );
           if (matched) {
             // close only this specific leg
-            matched.closed    = true;
+            matched.closed = true;
             matched.exitPrice = matched.currentPrice || matched.entryPremium;
-            matched.closedAt  = new Date().toISOString();
+            matched.closedAt = new Date().toISOString();
 
             // check if ALL legs are now closed
             const allClosed = [
-              p.if_ceSell, p.if_peSell, p.if_ceBuy, p.if_peBuy,
+              p.if_ceSell,
+              p.if_peSell,
+              p.if_ceBuy,
+              p.if_peBuy,
               ...(p.if_bwLegs || []),
             ].every((l) => !l || l.closed);
 
@@ -368,12 +375,12 @@ exports.exitSingle = async (req, res) => {
 
             if (p._id) {
               await PositionModel.findByIdAndUpdate(p._id, {
-                isClosed:  p.isClosed,
-                isActive:  p.isActive,
+                isClosed: p.isClosed,
+                isActive: p.isActive,
                 if_ceSell: p.if_ceSell,
                 if_peSell: p.if_peSell,
-                if_ceBuy:  p.if_ceBuy,
-                if_peBuy:  p.if_peBuy,
+                if_ceBuy: p.if_ceBuy,
+                if_peBuy: p.if_peBuy,
                 if_bwLegs: p.if_bwLegs,
               });
             }
@@ -385,7 +392,9 @@ exports.exitSingle = async (req, res) => {
           p.strategyType === "INTRADAY_STRADDLE" ||
           p.strategyType === "INTRADAY_STRANGLE"
         ) {
-          const leg = (p.st_legs || []).find((l) => !l.closed && l.symbol === symbol);
+          const leg = (p.st_legs || []).find(
+            (l) => !l.closed && l.symbol === symbol,
+          );
           if (leg) {
             leg.closed = true;
             leg.exitPrice = leg.currentPrice || leg.entryPremium;
@@ -515,68 +524,94 @@ exports.getPaperPositions = async (req, res) => {
     const formatted = [];
     let legOrder = 0;
     positions.forEach((p) => {
-
       // ── IRON FLY — 4 legs + optional broken wing legs ──
       if (p.strategyType === "IRON_FLY") {
         const ifLegs = [
-          { leg: p.if_ceSell, type: "SELL", optType: "CE", label: "ATM CE SELL" },
-          { leg: p.if_peSell, type: "SELL", optType: "PE", label: "ATM PE SELL" },
-          { leg: p.if_ceBuy,  type: "BUY",  optType: "CE", label: "CE WING BUY" },
-          { leg: p.if_peBuy,  type: "BUY",  optType: "PE", label: "PE WING BUY" },
+          {
+            leg: p.if_ceSell,
+            type: "SELL",
+            optType: "CE",
+            label: "ATM CE SELL",
+          },
+          {
+            leg: p.if_peSell,
+            type: "SELL",
+            optType: "PE",
+            label: "ATM PE SELL",
+          },
+          { leg: p.if_ceBuy, type: "BUY", optType: "CE", label: "CE WING BUY" },
+          { leg: p.if_peBuy, type: "BUY", optType: "PE", label: "PE WING BUY" },
         ];
         for (const { leg, type, optType } of ifLegs) {
           if (!leg) continue;
-          const ltp = lastTickMap[Number(leg.token)] || leg.currentPrice || leg.entryPremium || 0;
+          const ltp =
+            lastTickMap[Number(leg.token)] ||
+            leg.currentPrice ||
+            leg.entryPremium ||
+            0;
           const entryPrem = leg.entryPremium || 0;
           const exitPrice = leg.exitPrice || ltp;
-          const isClosed  = leg.closed || false;
-          const pnl = type === "SELL"
-            ? (entryPrem - (isClosed ? exitPrice : ltp)) * (p.quantity || 0)
-            : ((isClosed ? exitPrice : ltp) - entryPrem) * (p.quantity || 0);
+          const isClosed = leg.closed || false;
+          const pnl =
+            type === "SELL"
+              ? (entryPrem - (isClosed ? exitPrice : ltp)) * (p.quantity || 0)
+              : ((isClosed ? exitPrice : ltp) - entryPrem) * (p.quantity || 0);
           formatted.push({
-            token:        Number(leg.token),
-            symbol:       leg.symbol || `${p.index} ${leg.strike} ${optType}`,
-            legOrder:     ++legOrder,
-            qty:          type === "SELL" ? -(p.quantity || 0) : (p.quantity || 0),
-            expiry:       p.expiry,
+            token: Number(leg.token),
+            symbol: leg.symbol || `${p.index} ${leg.strike} ${optType}`,
+            legOrder: ++legOrder,
+            qty: type === "SELL" ? -(p.quantity || 0) : p.quantity || 0,
+            expiry: p.expiry,
             type,
-            lots:         p.lots || 1,
+            lots: p.lots || 1,
             strategyType: p.strategyType,
-            avgPrice:     Number(entryPrem.toFixed(2)),
-            ltp:          Number((isClosed ? exitPrice : ltp).toFixed(2)),
-            pnl:          Number(pnl.toFixed(2)),
-            status:       isClosed ? "CLOSED" : "OPEN",
-            points:       calcPoints(entryPrem, isClosed ? exitPrice : ltp, type === "BUY"),
-            openedAt:     leg.openedAt || null,
-            closedAt:     leg.closedAt || null,
+            avgPrice: Number(entryPrem.toFixed(2)),
+            ltp: Number((isClosed ? exitPrice : ltp).toFixed(2)),
+            pnl: Number(pnl.toFixed(2)),
+            status: isClosed ? "CLOSED" : "OPEN",
+            points: calcPoints(
+              entryPrem,
+              isClosed ? exitPrice : ltp,
+              type === "BUY",
+            ),
+            openedAt: leg.openedAt || null,
+            closedAt: leg.closedAt || null,
           });
         }
         // ── broken wing legs ──
         for (const leg of p.if_bwLegs || []) {
-          const ltp = lastTickMap[Number(leg.token)] || leg.currentPrice || leg.entryPremium || 0;
+          const ltp =
+            lastTickMap[Number(leg.token)] ||
+            leg.currentPrice ||
+            leg.entryPremium ||
+            0;
           const entryPrem = leg.entryPremium || 0;
           const exitPrice = leg.exitPrice || ltp;
-          const isClosed  = leg.closed || false;
-          const type      = leg.isBuy ? "BUY" : "SELL";
+          const isClosed = leg.closed || false;
+          const type = leg.isBuy ? "BUY" : "SELL";
           const pnl = leg.isBuy
             ? ((isClosed ? exitPrice : ltp) - entryPrem) * (p.quantity || 0)
             : (entryPrem - (isClosed ? exitPrice : ltp)) * (p.quantity || 0);
           formatted.push({
-            token:        Number(leg.token),
-            symbol:       leg.symbol || `${p.index} ${leg.strike} ${leg.type}`,
-            legOrder:     ++legOrder,
-            qty:          leg.isBuy ? (p.quantity || 0) : -(p.quantity || 0),
-            expiry:       p.expiry,
+            token: Number(leg.token),
+            symbol: leg.symbol || `${p.index} ${leg.strike} ${leg.type}`,
+            legOrder: ++legOrder,
+            qty: leg.isBuy ? p.quantity || 0 : -(p.quantity || 0),
+            expiry: p.expiry,
             type,
-            lots:         p.lots || 1,
+            lots: p.lots || 1,
             strategyType: p.strategyType,
-            avgPrice:     Number(entryPrem.toFixed(2)),
-            ltp:          Number((isClosed ? exitPrice : ltp).toFixed(2)),
-            pnl:          Number(pnl.toFixed(2)),
-            status:       isClosed ? "CLOSED" : "OPEN",
-            points:       calcPoints(entryPrem, isClosed ? exitPrice : ltp, leg.isBuy),
-            openedAt:     leg.openedAt || null,
-            closedAt:     leg.closedAt || null,
+            avgPrice: Number(entryPrem.toFixed(2)),
+            ltp: Number((isClosed ? exitPrice : ltp).toFixed(2)),
+            pnl: Number(pnl.toFixed(2)),
+            status: isClosed ? "CLOSED" : "OPEN",
+            points: calcPoints(
+              entryPrem,
+              isClosed ? exitPrice : ltp,
+              leg.isBuy,
+            ),
+            openedAt: leg.openedAt || null,
+            closedAt: leg.closedAt || null,
           });
         }
         return;
@@ -617,7 +652,7 @@ exports.getPaperPositions = async (req, res) => {
             status: leg.closed ? "CLOSED" : "OPEN",
             points: calcPoints(
               leg.entryPremium || 0,
-              leg.closed ? (leg.exitPrice || leg.entryPremium || 0) : ltp,
+              leg.closed ? leg.exitPrice || leg.entryPremium || 0 : ltp,
               false,
             ),
             openedAt: leg.openedAt || null,
@@ -635,20 +670,20 @@ exports.getPaperPositions = async (req, res) => {
       (p.closedBuyLegs || []).forEach((leg) => {
         const pnl = (leg.exitPremium - leg.entryPremium) * (p.quantity || 0);
         allLegs.push({
-          token:    leg.token,
-          symbol:   leg.symbol,
-          expiry:   p.expiry,
-          qty:      0,
-          lots:     p.lots || 1,
+          token: leg.token,
+          symbol: leg.symbol,
+          expiry: p.expiry,
+          qty: 0,
+          lots: p.lots || 1,
           avgPrice: Number((leg.entryPremium || 0).toFixed(2)),
-          ltp:      Number((leg.exitPremium || 0).toFixed(2)),
-          pnl:      Number(pnl.toFixed(2)),
-          type:     "BUY → SELL",
-          status:   "CLOSED",
-          points:   calcPoints(leg.entryPremium, leg.exitPremium, true),
+          ltp: Number((leg.exitPremium || 0).toFixed(2)),
+          pnl: Number(pnl.toFixed(2)),
+          type: "BUY → SELL",
+          status: "CLOSED",
+          points: calcPoints(leg.entryPremium, leg.exitPremium, true),
           openedAt: leg.openedAt || null,
           closedAt: leg.closedAt || null,
-          _ts:      leg.closedAt ? new Date(leg.closedAt).getTime() : 1,
+          _ts: leg.closedAt ? new Date(leg.closedAt).getTime() : 1,
         });
       });
 
@@ -659,114 +694,171 @@ exports.getPaperPositions = async (req, res) => {
           : lastTickMap[p.buyToken] || p.currentBuyPrice || p.buyAvgPrice || 0;
       const buyPnl =
         p.buyQty === 0
-          ? ((p.closedBuyPrice || p.currentBuyPrice || p.buyAvgPrice || 0) - (p.buyAvgPrice || 0)) * (p.quantity || 0)
+          ? ((p.closedBuyPrice || p.currentBuyPrice || p.buyAvgPrice || 0) -
+              (p.buyAvgPrice || 0)) *
+            (p.quantity || 0)
           : (buyLtp - (p.buyAvgPrice || 0)) * (p.buyQty || 0);
       allLegs.push({
-        token:  p.buyToken,
+        token: p.buyToken,
         symbol: p.buySymbol || `${p.index} ${p.buyStrike}`,
         expiry: p.expiry,
         margin: p.margin || 0,
-        qty:    p.buyQty === 0 ? p.quantity : p.buyQty,
-        lots:   p.lots || 1,
+        qty: p.buyQty === 0 ? p.quantity : p.buyQty,
+        lots: p.lots || 1,
         avgPrice: Number((p.buyAvgPrice || 0).toFixed(2)),
-        ltp:    Number(buyLtp.toFixed(2)),
-        pnl:    Number(buyPnl.toFixed(2)),
-        type:   p.buyQty !== 0 ? "BUY" : "BUY → SELL",
+        ltp: Number(buyLtp.toFixed(2)),
+        pnl: Number(buyPnl.toFixed(2)),
+        type: p.buyQty !== 0 ? "BUY" : "BUY → SELL",
         status: p.buyQty !== 0 ? "OPEN" : "CLOSED",
         points: calcPoints(p.buyAvgPrice, buyLtp, true),
         openedAt: p.entryTime ? new Date(p.entryTime).toISOString() : null,
         closedAt: p.buyQty === 0 && p.closedBuyAt ? p.closedBuyAt : null,
-        _ts:    p.entryTime || 2,
+        _ts: p.entryTime || 2,
       });
 
       // sell leg
       const sellLtp =
         p.sellQty === 0
           ? p.closedSellPrice || p.currentSellPrice || p.sellAvgPrice || 0
-          : lastTickMap[p.sellToken] || p.currentSellPrice || p.sellAvgPrice || 0;
+          : lastTickMap[p.sellToken] ||
+            p.currentSellPrice ||
+            p.sellAvgPrice ||
+            0;
       const sellPnl =
         p.sellQty === 0
-          ? ((p.sellAvgPrice || 0) - (p.closedSellPrice || p.currentSellPrice || p.sellAvgPrice || 0)) * (p.quantity || 0)
+          ? ((p.sellAvgPrice || 0) -
+              (p.closedSellPrice ||
+                p.currentSellPrice ||
+                p.sellAvgPrice ||
+                0)) *
+            (p.quantity || 0)
           : ((p.sellAvgPrice || 0) - sellLtp) * (p.sellQty || 0);
       allLegs.push({
-        token:  p.sellToken,
+        token: p.sellToken,
         symbol: p.sellSymbol || `${p.index} ${p.sellStrike}`,
         expiry: p.expiry,
         margin: p.margin || 0,
-        qty:    -(p.sellQty || 0),
-        lots:   p.lots || 1,
+        qty: -(p.sellQty || 0),
+        lots: p.lots || 1,
         avgPrice: Number((p.sellAvgPrice || 0).toFixed(2)),
-        ltp:    Number(sellLtp.toFixed(2)),
-        pnl:    Number(sellPnl.toFixed(2)),
-        type:   p.sellQty !== 0 ? "SELL" : "SELL → BUY",
+        ltp: Number(sellLtp.toFixed(2)),
+        pnl: Number(sellPnl.toFixed(2)),
+        type: p.sellQty !== 0 ? "SELL" : "SELL → BUY",
         status: p.sellQty !== 0 ? "OPEN" : "CLOSED",
         points: calcPoints(p.sellAvgPrice, sellLtp, false),
         openedAt: p.entryTime ? new Date(p.entryTime).toISOString() : null,
         closedAt: null,
-        _ts:    (p.entryTime || 3) + 1,
+        _ts: (p.entryTime || 3) + 1,
       });
 
       // active CE strangle leg
-      if (p.isStrangle && p.CE_sell && typeof p.CE_sell.strike === "number" && !isNaN(p.CE_sell.strike) && p.CE_sell.strike !== p.sellStrike) {
-        const ceLtp = p.CE_sell.currentPrice || lastTickMap[p.CE_sell.token] || p.CE_sell.premium || 0;
+      if (
+        p.isStrangle &&
+        p.CE_sell &&
+        typeof p.CE_sell.strike === "number" &&
+        !isNaN(p.CE_sell.strike) &&
+        p.CE_sell.strike !== p.sellStrike
+      ) {
+        const ceLtp =
+          p.CE_sell.currentPrice ||
+          lastTickMap[p.CE_sell.token] ||
+          p.CE_sell.premium ||
+          0;
         const cePnl = ((p.CE_sell.premium || 0) - ceLtp) * (p.quantity || 0);
         allLegs.push({
-          token:  p.CE_sell.token,
-          symbol: buildSymbol({ instrument: p.index, strike: p.CE_sell.strike, type: "CE", expiry: p.expiry }),
+          token: p.CE_sell.token,
+          symbol: buildSymbol({
+            instrument: p.index,
+            strike: p.CE_sell.strike,
+            type: "CE",
+            expiry: p.expiry,
+          }),
           expiry: p.expiry,
-          qty:    -(p.quantity || 0),
-          lots:   p.lots || 1,
+          qty: -(p.quantity || 0),
+          lots: p.lots || 1,
           avgPrice: Number((p.CE_sell.premium || 0).toFixed(2)),
-          ltp:    Number(ceLtp.toFixed(2)),
-          pnl:    Number(cePnl.toFixed(2)),
-          type:   "SELL",
+          ltp: Number(ceLtp.toFixed(2)),
+          pnl: Number(cePnl.toFixed(2)),
+          type: "SELL",
           status: "OPEN",
           points: calcPoints(p.CE_sell.premium || 0, ceLtp, false),
           openedAt: p.CE_sell.openedAt || null,
           closedAt: null,
-          _ts:    p.CE_sell.openedAt ? new Date(p.CE_sell.openedAt).getTime() : Date.now(),
+          _ts: p.CE_sell.openedAt
+            ? new Date(p.CE_sell.openedAt).getTime()
+            : Date.now(),
         });
       }
 
       // active PE strangle leg (BULL_CALL only)
-      if (p.isStrangle && p.type === "BULL_CALL" && p.PE_sell && typeof p.PE_sell.strike === "number" && !isNaN(p.PE_sell.strike)) {
-        const peLtp = p.PE_sell.currentPrice || lastTickMap[p.PE_sell.token] || p.PE_sell.premium || 0;
+      if (
+        p.isStrangle &&
+        p.type === "BULL_CALL" &&
+        p.PE_sell &&
+        typeof p.PE_sell.strike === "number" &&
+        !isNaN(p.PE_sell.strike)
+      ) {
+        const peLtp =
+          p.PE_sell.currentPrice ||
+          lastTickMap[p.PE_sell.token] ||
+          p.PE_sell.premium ||
+          0;
         const pePnl = ((p.PE_sell.premium || 0) - peLtp) * (p.quantity || 0);
         allLegs.push({
-          token:  p.PE_sell.token,
-          symbol: buildSymbol({ instrument: p.index, strike: p.PE_sell.strike, type: "PE", expiry: p.expiry }),
+          token: p.PE_sell.token,
+          symbol: buildSymbol({
+            instrument: p.index,
+            strike: p.PE_sell.strike,
+            type: "PE",
+            expiry: p.expiry,
+          }),
           expiry: p.expiry,
-          qty:    -(p.quantity || 0),
-          lots:   p.lots || 1,
+          qty: -(p.quantity || 0),
+          lots: p.lots || 1,
           avgPrice: Number((p.PE_sell.premium || 0).toFixed(2)),
-          ltp:    Number(peLtp.toFixed(2)),
-          pnl:    Number(pePnl.toFixed(2)),
-          type:   "SELL",
+          ltp: Number(peLtp.toFixed(2)),
+          pnl: Number(pePnl.toFixed(2)),
+          type: "SELL",
           status: "OPEN",
           points: calcPoints(p.PE_sell.premium || 0, peLtp, false),
           openedAt: p.PE_sell.openedAt || null,
           closedAt: null,
-          _ts:    p.PE_sell.openedAt ? new Date(p.PE_sell.openedAt).getTime() : Date.now(),
+          _ts: p.PE_sell.openedAt
+            ? new Date(p.PE_sell.openedAt).getTime()
+            : Date.now(),
         });
       }
 
       // closed strangle legs
       (p.closedStrangleLegs || []).forEach((leg) => {
         allLegs.push({
-          token:  null,
-          symbol: buildSymbol({ instrument: p.index, strike: leg.strike, type: leg.type, expiry: p.expiry }),
+          token: null,
+          symbol: buildSymbol({
+            instrument: p.index,
+            strike: leg.strike,
+            type: leg.type,
+            expiry: p.expiry,
+          }),
           expiry: p.expiry,
-          qty:    -(p.quantity || 0),
-          lots:   p.lots || 1,
+          qty: -(p.quantity || 0),
+          lots: p.lots || 1,
           avgPrice: Number((leg.entryPremium || 0).toFixed(2)),
-          ltp:    Number((leg.exitPremium || 0).toFixed(2)),
-          pnl:    Number((leg.pnl || 0).toFixed(2)),
-          type:   "SELL → BUY",
+          ltp: Number((leg.exitPremium || 0).toFixed(2)),
+          pnl: Number((leg.pnl || 0).toFixed(2)),
+          type: "SELL → BUY",
           status: "CLOSED",
-          points: calcPoints(leg.entryPremium || 0, leg.exitPremium || 0, false),
+          points: calcPoints(
+            leg.entryPremium || 0,
+            leg.exitPremium || 0,
+            false,
+          ),
           openedAt: leg.openedAt || null,
           closedAt: leg.closedAt || null,
-          _ts:    leg.openedAt ? new Date(leg.openedAt).getTime() : (leg.closedAt ? new Date(leg.closedAt).getTime() : Date.now()),
+          _ts: leg.openedAt
+            ? new Date(leg.openedAt).getTime()
+            : leg.closedAt
+              ? new Date(leg.closedAt).getTime()
+              : Date.now(),
         });
       });
 
@@ -775,8 +867,6 @@ exports.getPaperPositions = async (req, res) => {
       allLegs.forEach((leg) => {
         formatted.push({ ...leg, legOrder: ++legOrder });
       });
-
-      
     });
 
     res.json({ success: true, data: formatted });

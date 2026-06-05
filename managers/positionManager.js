@@ -521,6 +521,7 @@ class PositionManager {
       if (position.isClosed) continue;
       if (position.forceExit && !position.isClosed) {
         logger.log("🚨 MAX LOSS — auto closing position");
+        await this.recordClosedTrade(position, "MAX_LOSS");
         position.isClosed = true;
         position.isActive = false;
         if (position._id) {
@@ -779,45 +780,7 @@ class PositionManager {
       const sellPnl = (position.sellAvgPrice - sellExitPrice) * qty;
       const totalPnl = buyPnl + sellPnl;
 
-      await Trade.create({
-        userId: position.userId,
-        strategy: position.type,
-        instrument: position.index,
-        mode: position.mode || "paper",
-        entryTime: position.createdAt,
-        exitTime: new Date(),
-        status: "CLOSED",
-        legs: [
-          {
-            symbol: position.buySymbol,
-            type: "BUY",
-            qty,
-            entryPrice: position.buyAvgPrice,
-            exitPrice: buyExitPrice,
-            pnl: buyPnl,
-            status: "CLOSED",
-          },
-          {
-            symbol: position.sellSymbol,
-            type: "SELL",
-            qty,
-            entryPrice: position.sellAvgPrice,
-            exitPrice: sellExitPrice,
-            pnl: sellPnl,
-            status: "CLOSED",
-          },
-        ],
-        adjustments:
-          position.history?.map((h) => ({
-            timestamp: h.timestamp,
-            reason: h.action,
-          })) || [],
-        totalPnl,
-        brokerage: 0,
-        charges: 0,
-        netPnl: totalPnl,
-      });
-
+      await this.recordClosedTrade(position, "TARGET_SL");
       position.isClosed = true;
       if (position._id) {
         await PositionModel.findByIdAndUpdate(position._id, {
@@ -829,6 +792,108 @@ class PositionManager {
       logger.log("✅ Position Fully Exited");
     } catch (err) {
       logger.log("❌ Exit Error:", err.message);
+    }
+  }
+  // =====================
+  // RECORD CLOSED TRADE (strategy-aware) — writes ONE CLOSED Trade doc
+  // Called from: forceExit (max loss), exitPosition (target/SL), Exit All
+  // =====================
+  async recordClosedTrade(position, reason = "EXIT") {
+    try {
+      // guard: don't write twice for the same position
+      if (position._tradeRecorded) return;
+      position._tradeRecorded = true;
+
+      const qty = position.quantity || 0;
+      let legs = [];
+      let netPnl = 0;
+      let strategyLabel = position.strategy || position.type || position.strategyType;
+
+      if (
+        position.strategyType === "INTRADAY_STRADDLE" ||
+        position.strategyType === "INTRADAY_STRANGLE"
+      ) {
+        // realized (closed legs) + unrealized (open legs at last price)
+        netPnl = position.st_realizedPnl || 0;
+        for (const leg of position.st_legs || []) {
+          const exitPrice = leg.closed
+            ? (leg.exitPrice ?? leg.entryPremium)
+            : (leg.currentPrice ?? leg.entryPremium);
+          const legPnl = ((leg.entryPremium || 0) - (exitPrice || 0)) * qty;
+          if (!leg.closed) netPnl += legPnl;
+          legs.push({
+            symbol: leg.symbol,
+            type: "SELL",
+            qty,
+            entryPrice: leg.entryPremium || 0,
+            exitPrice: exitPrice || 0,
+            pnl: Number(legPnl.toFixed(2)),
+            status: "CLOSED",
+          });
+        }
+      } else if (position.strategyType === "IRON_FLY") {
+        const ifLegs = [
+          { leg: position.if_ceSell, type: "SELL" },
+          { leg: position.if_peSell, type: "SELL" },
+          { leg: position.if_ceBuy, type: "BUY" },
+          { leg: position.if_peBuy, type: "BUY" },
+          ...(position.if_bwLegs || []).map((l) => ({ leg: l, type: l.isBuy ? "BUY" : "SELL" })),
+        ];
+        for (const { leg, type } of ifLegs) {
+          if (!leg) continue;
+          const exitPrice = leg.exitPrice ?? leg.currentPrice ?? leg.entryPremium;
+          const legPnl = type === "BUY"
+            ? ((exitPrice || 0) - (leg.entryPremium || 0)) * qty
+            : ((leg.entryPremium || 0) - (exitPrice || 0)) * qty;
+          netPnl += legPnl;
+          legs.push({
+            symbol: leg.symbol,
+            type,
+            qty,
+            entryPrice: leg.entryPremium || 0,
+            exitPrice: exitPrice || 0,
+            pnl: Number(legPnl.toFixed(2)),
+            status: "CLOSED",
+          });
+        }
+      } else {
+        // debit spread
+        const buyExit = position.currentBuyPrice || position.buyAvgPrice || 0;
+        const sellExit = position.currentSellPrice || position.sellAvgPrice || 0;
+        const buyPnl = (buyExit - (position.buyAvgPrice || 0)) * qty;
+        const sellPnl = ((position.sellAvgPrice || 0) - sellExit) * qty;
+        netPnl = buyPnl + sellPnl + (position.realizedProfitFromShifts || 0);
+        legs = [
+          { symbol: position.buySymbol, type: "BUY", qty, entryPrice: position.buyAvgPrice || 0, exitPrice: buyExit, pnl: Number(buyPnl.toFixed(2)), status: "CLOSED" },
+          { symbol: position.sellSymbol, type: "SELL", qty, entryPrice: position.sellAvgPrice || 0, exitPrice: sellExit, pnl: Number(sellPnl.toFixed(2)), status: "CLOSED" },
+        ];
+      }
+
+      netPnl = Number(netPnl.toFixed(2));
+
+      await Trade.create({
+        userId: position.userId,
+        strategy: strategyLabel,
+        instrument: position.index,
+        mode: position.mode || "paper",
+        entryTime: position.createdAt || position.entryTime,
+        exitTime: new Date(),
+        status: "CLOSED",
+        legs,
+        adjustments:
+          position.history?.map((h) => ({
+            timestamp: h.time || h.timestamp,
+            reason: h.type || h.action,
+          })) || [],
+        totalPnl: netPnl,
+        brokerage: 0,
+        charges: 0,
+        netPnl,
+      });
+
+      logger.log(`📦 CLOSED trade recorded | ${strategyLabel} | netPnl: ${netPnl} | reason: ${reason}`);
+    } catch (err) {
+      logger.log("❌ recordClosedTrade error:", err.message);
     }
   }
 }
