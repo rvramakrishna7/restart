@@ -1,0 +1,24 @@
+.activity-feed {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+.activity-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1f3864;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.activity-row {
+  display: flex;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #eef2f6;
+}
+.activity-row:last-child { border-bottom: none; }
+.activity-time { color: #64748b; min-width: 70px; }
+.activity-msg { color: #1e293b; }

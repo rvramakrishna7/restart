@@ -20,6 +20,7 @@ router.get("/positions", auth, controller.getRealPositions);
 router.get("/real-positions", auth, controller.getRealPositions);
 router.get("/live-engine-positions", auth, getLivePositions);
 router.get("/paper-positions", auth, controller.getPaperPositions);
+router.get("/events", auth, controller.getEngineEvents);
 
 // =====================
 // EXIT

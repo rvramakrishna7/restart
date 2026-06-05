@@ -223,6 +223,45 @@ exports.exitAll = async (req, res) => {
 };
 
 // =====================
+// ENGINE EVENTS (safe, user-facing) — for toasts + activity timeline
+// Reads position.history[] and maps internal types to friendly messages.
+// Never exposes thresholds, strikes, or strategy parameters.
+// =====================
+const EVENT_LABELS = {
+  STRADDLE_TO_STRANGLE: "Position adjusted — converted to strangle",
+  STRANGLE_TO_STRADDLE: "Position adjusted — rebalanced",
+  MAX_LOSS: "Risk limit reached — position closed",
+  TARGET: "Target reached — position closed",
+};
+
+exports.getEngineEvents = async (req, res) => {
+  try {
+    const positions = tradingService.getPositions();
+    const events = [];
+
+    for (const p of positions) {
+      for (const h of p.history || []) {
+        events.push({
+          time: h.time || h.timestamp || null,
+          type: h.type || h.action || "EVENT",
+          message: EVENT_LABELS[h.type] || "Position adjusted",
+          instrument: p.index,
+          strategyType: p.strategyType,
+        });
+      }
+    }
+
+    // newest first, cap to last 50
+    events.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    res.json({ success: true, data: events.slice(0, 50) });
+  } catch (err) {
+    logger.error("getEngineEvents error:", err.message);
+    res.json({ success: true, data: [] });
+  }
+};
+
+// =====================
 // REAL POSITIONS
 // =====================
 exports.getRealPositions = async (req, res) => {

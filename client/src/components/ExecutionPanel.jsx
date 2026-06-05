@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "../api/axios";
+import toast from "react-hot-toast";
 import PayoffChart from "./PayoffChart";
 import "../styles.css";
 
@@ -44,6 +45,8 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
   const [payoffData, setPayoffData] = useState([]);
   const [payoffMetrics, setPayoffMetrics] = useState({});
   const ltpMapRef = useRef({});
+  const [events, setEvents] = useState([]);
+  const seenEventsRef = useRef(new Set()); // tracks events already toasted
 
   const totalPnl = positions.reduce((sum, p) => sum + Number(p.pnl || 0), 0);
   const totalPoints = positions.reduce((sum, p) => sum + Number(p.points || 0), 0);
@@ -99,11 +102,48 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
   };
 
   // =====================
+  // FETCH ENGINE EVENTS → toast new ones, feed timeline
+  // =====================
+  const fetchEvents = async () => {
+    try {
+      const res = await axios.get("/api/strategy/events");
+      const data = res.data?.data || [];
+      setEvents(data);
+
+      // toast any event we haven't shown yet (skip first load to avoid a flood)
+      if (seenEventsRef.current.size === 0) {
+        data.forEach((e) => seenEventsRef.current.add(`${e.time}-${e.type}`));
+        return;
+      }
+      data
+        .slice()
+        .reverse()
+        .forEach((e) => {
+          const key = `${e.time}-${e.type}`;
+          if (!seenEventsRef.current.has(key)) {
+            seenEventsRef.current.add(key);
+            const isClose = e.type === "MAX_LOSS" || e.type === "TARGET";
+            toast(`${isClose ? "🚪" : "🔄"} ${e.message}`, {
+              icon: isClose ? "⚠️" : "🔄",
+              duration: 5000,
+            });
+          }
+        });
+    } catch (_) {
+      // silent — events are non-critical
+    }
+  };
+
+  // =====================
   // INIT — poll + WS
   // =====================
   useEffect(() => {
     fetchPositions();
-    const interval = setInterval(fetchPositions, 5000);
+    fetchEvents();
+    const interval = setInterval(() => {
+      fetchPositions();
+      fetchEvents();
+    }, 5000);
 
     const tickHandler = (ticks) => {
       ticks.forEach((t) => {
@@ -458,6 +498,20 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                 metrics={payoffMetrics}
                 positions={positions}
               />
+            )}
+            {events.length > 0 && (
+              <div className="activity-feed">
+                <div className="activity-title">Activity</div>
+                {events.slice(0, 8).map((e, i) => (
+                  <div key={i} className="activity-row">
+                    <span className="activity-time">{formatTime(e.time)}</span>
+                    <span className="activity-msg">
+                      {e.type === "MAX_LOSS" || e.type === "TARGET" ? "🚪" : "🔄"}{" "}
+                      {e.message}
+                    </span>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
