@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import {
   LineChart,
   Line,
@@ -394,6 +395,7 @@ export default function Analytics() {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

@@ -336,6 +336,3 @@ img, svg, canvas { max-width: 100%; }
   .mode-label { padding: 3px 8px; font-size: 11.5px; }
 }
 
-@media (max-height: 480px) and (orientation: landscape) {
-  .navbar { position: static; }
-}

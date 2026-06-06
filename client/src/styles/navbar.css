@@ -2,8 +2,9 @@
 
 .navbar {
   position: sticky;
+  position: -webkit-sticky;
   top: 0;
-  z-index: 999;
+  z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;

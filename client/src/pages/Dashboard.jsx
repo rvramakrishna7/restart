@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import axios from "../api/axios";
 import "../styles.css";
 
@@ -108,6 +109,7 @@ const Dashboard = () => {
   const fmtSign  = (v) => (v < 0 ? "-" : v > 0 ? "+" : "");
 
   return (
+    <>
     <div className="app">
       <Navbar />
 
@@ -148,7 +150,7 @@ const Dashboard = () => {
               </div>
             </div>
             <button className="primary-btn" onClick={handleConnectBroker}>
-              Connect Zerodha
+              Connect Broker
             </button>
           </div>
         )}
@@ -224,6 +226,8 @@ const Dashboard = () => {
 
       </div>
     </div>
+    <Footer />
+    </>
   );
 };
 

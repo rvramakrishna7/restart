@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "../api/axios";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import "../styles.css";
 import ExecutionPanel from "../components/ExecutionPanel";
 import ModeToggle from "../components/ModeToggle";
@@ -340,6 +341,8 @@ const StrategySelection = () => {
   };
 
   return (
+    <>
+    
     <div className="app">
       <Navbar />
 
@@ -727,6 +730,8 @@ const StrategySelection = () => {
         )}
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
