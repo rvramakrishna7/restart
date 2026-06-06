@@ -72,6 +72,11 @@ const StrategySelection = () => {
   const [running, setRunning] = useState(false);
   const [mode, setMode] = useState("paper");
 
+  // mobile-only: which strategy cards are expanded
+  const [openCard, setOpenCard] = useState({});
+  const toggleCard = (key) =>
+    setOpenCard((prev) => ({ ...prev, [key]: !prev[key] }));
+
   useEffect(() => {
     localStorage.setItem("mode", mode);
   }, [mode]);
@@ -340,6 +345,22 @@ const StrategySelection = () => {
     }
   };
 
+  // per-strategy open PnL for mobile card headers
+  const pnlByType = (types) =>
+    positions
+      .filter((p) => types.includes(p.strategyType) && p.status === "OPEN")
+      .reduce((a, p) => a + (p.pnl || 0), 0);
+  const dsPnl = positions
+    .filter(
+      (p) =>
+        (p.strategyType === "DEBIT_SPREAD" || !p.strategyType) &&
+        p.status === "OPEN",
+    )
+    .reduce((a, p) => a + (p.pnl || 0), 0);
+  const ifPnl = pnlByType(["IRON_FLY"]);
+  const stPnl = pnlByType(["INTRADAY_STRADDLE"]);
+  const sgPnl = pnlByType(["INTRADAY_STRANGLE"]);
+
   return (
     <>
     
@@ -350,7 +371,22 @@ const StrategySelection = () => {
         <h2>Strategies</h2>
         <div className="category-title">Positional Strategies</div>
         {/* ================= STRATEGY CONTROLS ================= */}
-        <div className="strategy-row">
+        <div className={`strategy-row ${openCard.ds ? "expanded" : "collapsed"}`}>
+          <div className="mobile-card-header" onClick={() => toggleCard("ds")}>
+            <span className="mch-name">Debit Spread</span>
+            <span className="mch-right">
+              {running && (
+                <span className={`mch-pnl ${dsPnl >= 0 ? "profit" : "loss"}`}>
+                  {dsPnl >= 0 ? "+" : ""}₹{Math.abs(dsPnl).toFixed(2)}
+                </span>
+              )}
+              <span className={`mch-chevron ${openCard.ds ? "open" : ""}`}>
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </span>
+          </div>
           <div className="strategy-name">Debit Spread</div>
           <ModeToggle mode={mode} setMode={setMode} />
           <button
@@ -475,7 +511,22 @@ const StrategySelection = () => {
         )}
 
         {/* ================= IRON FLY ROW ================= */}
-        <div className="strategy-row">
+        <div className={`strategy-row ${openCard.if ? "expanded" : "collapsed"}`}>
+          <div className="mobile-card-header" onClick={() => toggleCard("if")}>
+            <span className="mch-name">Iron Fly</span>
+            <span className="mch-right">
+              {ifRunning && (
+                <span className={`mch-pnl ${ifPnl >= 0 ? "profit" : "loss"}`}>
+                  {ifPnl >= 0 ? "+" : ""}₹{Math.abs(ifPnl).toFixed(2)}
+                </span>
+              )}
+              <span className={`mch-chevron ${openCard.if ? "open" : ""}`}>
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </span>
+          </div>
           <div className="strategy-name">Iron Fly</div>
           <ModeToggle mode={ifMode} setMode={setIfMode} />
           <button
@@ -565,7 +616,22 @@ const StrategySelection = () => {
         {/* ================= STRATEGY SECTIONS ================= */}
         <div className="category-title">Intraday Strategies</div>
         {/* ================= STRADDLE ROW ================= */}
-        <div className="strategy-row">
+        <div className={`strategy-row ${openCard.st ? "expanded" : "collapsed"}`}>
+          <div className="mobile-card-header" onClick={() => toggleCard("st")}>
+            <span className="mch-name">Straddle</span>
+            <span className="mch-right">
+              {stRunning && (
+                <span className={`mch-pnl ${stPnl >= 0 ? "profit" : "loss"}`}>
+                  {stPnl >= 0 ? "+" : ""}₹{Math.abs(stPnl).toFixed(2)}
+                </span>
+              )}
+              <span className={`mch-chevron ${openCard.st ? "open" : ""}`}>
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </span>
+          </div>
           <div className="strategy-name">Straddle</div>
           <ModeToggle mode={stMode} setMode={setStMode} />
           <button
@@ -645,7 +711,22 @@ const StrategySelection = () => {
         )}
 
         {/* ================= STRANGLE ROW ================= */}
-        <div className="strategy-row">
+        <div className={`strategy-row ${openCard.sg ? "expanded" : "collapsed"}`}>
+          <div className="mobile-card-header" onClick={() => toggleCard("sg")}>
+            <span className="mch-name">Strangle</span>
+            <span className="mch-right">
+              {sgRunning && (
+                <span className={`mch-pnl ${sgPnl >= 0 ? "profit" : "loss"}`}>
+                  {sgPnl >= 0 ? "+" : ""}₹{Math.abs(sgPnl).toFixed(2)}
+                </span>
+              )}
+              <span className={`mch-chevron ${openCard.sg ? "open" : ""}`}>
+                <svg viewBox="0 0 24 24" width="18" height="18">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </span>
+          </div>
           <div className="strategy-name">Strangle</div>
           <ModeToggle mode={sgMode} setMode={setSgMode} />
           <button

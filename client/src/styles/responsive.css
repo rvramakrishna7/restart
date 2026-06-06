@@ -6,6 +6,9 @@
 html, body { max-width: 100%; overflow-x: hidden; }
 img, svg, canvas { max-width: 100%; }
 
+/* mobile-only collapsible strategy card header — hidden on desktop */
+.mobile-card-header { display: none; }
+
 /* ===================== TABLET ≤ 1024px ===================== */
 @media (max-width: 1024px) {
   .main { padding: 20px 18px; }
@@ -135,6 +138,29 @@ img, svg, canvas { max-width: 100%; }
   /* ---- STRATEGY ROW ---- */
   .strategy-row { gap: 10px; padding: 14px; align-items: stretch; }
   .strategy-name { min-width: 0; width: 100%; }
+  /* ===== MOBILE COLLAPSIBLE STRATEGY CARDS ===== */
+  .mobile-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+  }
+  .mch-name { font-size: 16px; font-weight: 700; color: #0f172a; }
+  .mch-right { display: flex; align-items: center; gap: 10px; }
+  .mch-pnl { font-size: 14px; font-weight: 700; }
+  .mch-chevron { display: inline-flex; color: #475569; transition: transform 0.2s ease; }
+  .mch-chevron.open { transform: rotate(180deg); }
+
+  /* original inline name hidden on mobile (the header shows it) */
+  .strategy-row > .strategy-name { display: none; }
+
+  /* collapsed card: show only the header */
+  .strategy-row.collapsed > *:not(.mobile-card-header) { display: none; }
+  /* collapsed card: also hide the preview / no-trade strip that follows it */
+  .strategy-row.collapsed + .preview-row,
+  .strategy-row.collapsed + .no-trade { display: none; }
+  
   .instrument-switch, .expiry-switch { width: 100%; }
   .chip { flex: 1 1 auto; text-align: center; }
   .execute-inline { margin-left: 0; width: 100%; }
