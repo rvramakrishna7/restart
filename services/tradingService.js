@@ -597,7 +597,7 @@ async function executeStraddle({
   if (!peResult.success) throw new Error("PE SELL failed");
 
   logger.log(`✅ Straddle executed | CE @ ${ceResult.avgPrice} | PE @ ${peResult.avgPrice}`);
-
+  require("./notify").sendAlert(`🎯 STRADDLE entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
   const entryPremium = (ceResult.avgPrice || 0) + (peResult.avgPrice || 0);
 
   // ── build position ──
@@ -812,7 +812,7 @@ async function executeStrangle({
   if (!peResult.success) throw new Error("PE SELL failed");
 
   logger.log(`✅ Strangle executed | CE ${bestCE.strike}@${ceResult.avgPrice} | PE ${bestPE.strike}@${peResult.avgPrice}`);
-
+  require("./notify").sendAlert(`🎯 STRANGLE entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
   const position = {
     strategyType:          "INTRADAY_STRANGLE",
     index:                 instrument,
@@ -990,7 +990,7 @@ async function executeIronFly({
   if (!peBuyResult.success) throw new Error("PE BUY failed");
 
   logger.log(`✅ Iron fly executed | CE sell@${ceSellResult.avgPrice} PE sell@${peSellResult.avgPrice} CE buy@${ceBuyResult.avgPrice} PE buy@${peBuyResult.avgPrice}`);
-
+  require("./notify").sendAlert(`🎯 IRON FLY entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
   const position = {
     strategyType:      "IRON_FLY",
     index:             instrument,

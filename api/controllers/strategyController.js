@@ -183,7 +183,7 @@ exports.exitAll = async (req, res) => {
           });
       }
       // ── purge all closed positions from in-memory array ──
-      
+      require("../../services/notify").sendAlert(`🧹 All positions closed manually`);
       mgr.positions = mgr.positions.filter((p) => !p.isClosed);
       logger.log(
         `🧹 Exit All: memory cleared, ${mgr.positions.length} position(s) remain`,

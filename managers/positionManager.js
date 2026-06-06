@@ -522,6 +522,7 @@ class PositionManager {
       if (position.forceExit && !position.isClosed) {
         logger.log("🚨 MAX LOSS — auto closing position");
         await this.recordClosedTrade(position, "MAX_LOSS");
+        require("../services/notify").sendAlert(`🚨 MAX LOSS | ${position.index} | position closed | PnL ₹${position.pnl}`);
         position.isClosed = true;
         position.isActive = false;
         if (position._id) {
@@ -690,6 +691,7 @@ class PositionManager {
 
       if (adjustmentChanged) {
         logger.log("🔄 Adjustment Detected → Refreshing Tokens");
+        require("../services/notify").sendAlert(`🔄 Adjustment | ${position.index} | position adjusted | PnL ₹${position.pnl}`);
         this.updateTokens();
       }
 
@@ -781,6 +783,7 @@ class PositionManager {
       const totalPnl = buyPnl + sellPnl;
 
       await this.recordClosedTrade(position, "TARGET_SL");
+      require("../services/notify").sendAlert(`✅ EXIT | ${position.index} | position closed | PnL ₹${position.pnl}`);
       position.isClosed = true;
       if (position._id) {
         await PositionModel.findByIdAndUpdate(position._id, {
