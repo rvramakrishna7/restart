@@ -3,7 +3,8 @@
    Breakpoints: 1024 (tablet) · 768 (mobile) · 480 (small phone)
    ===================================================================== */
 
-html, body { max-width: 100%; overflow-x: hidden; }
+html { overflow-x: hidden; }
+body { max-width: 100%; overflow-x: clip; }
 img, svg, canvas { max-width: 100%; }
 
 /* mobile-only collapsible strategy card header — hidden on desktop */
@@ -160,7 +161,7 @@ img, svg, canvas { max-width: 100%; }
   /* collapsed card: also hide the preview / no-trade strip that follows it */
   .strategy-row.collapsed + .preview-row,
   .strategy-row.collapsed + .no-trade { display: none; }
-  
+
   .instrument-switch, .expiry-switch { width: 100%; }
   .chip { flex: 1 1 auto; text-align: center; }
   .execute-inline { margin-left: 0; width: 100%; }

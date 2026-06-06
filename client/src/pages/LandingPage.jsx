@@ -94,7 +94,7 @@ const LandingPage = () => {
 
       {/* CONTENT */}
       <div className="landing-content">
-        <h1>RESTART Options</h1>
+        <h1>Restart Options</h1>
 
         <div className="landing-tagline">Zero se kar restart</div>
 
