@@ -205,7 +205,7 @@ const Product = () => {
           </h1>
           <p className="rp-hero-sub">
             Build. Test. Automate. Restart Options helps traders transform rule-based option
-            strategies into disciplined systems. No fear. No greed. No hesitation. Just execution.
+            strategies into disciplined systems.<br/> No fear. No greed. No hesitation. Just execution.
           </p>
           <div className="rp-hero-actions">
             <button className="rp-btn-primary" onClick={() => navigate("/contact")}>
@@ -441,9 +441,9 @@ const Product = () => {
       {/* ===== CTA ===== */}
       <section className="rp-cta rp-reveal">
         <h2 className="rp-cta-title">
-          The market is uncertain and dynamic. Your execution shouldn&apos;t be.
+          The market is uncertain and dynamic. <br/> Your execution shouldn&apos;t be.
         </h2>
-        <p>Build your strategy. Test it. Automate it. Let discipline become your edge.</p>
+        <p>Build your strategy. Test it. Automate it. <br/> Let discipline become your edge.</p>
       </section>
 
       {/* ===== FOOTER ===== */}
