@@ -9,6 +9,7 @@ const strategyRoutes = require("./api/routes/strategyRoutes");
 const userRoutes = require("./api/routes/userRoutes");
 const analyticsRoutes = require("./api/routes/analyticsRoutes");
 const authRoutes = require("./api/routes/authRoutes");
+const contactRoutes = require("./api/routes/contactRoutes");
 const { initWebSocket } = require("./services/websocketService");
 const { initSocket } = require("./services/socketServer");
 
@@ -37,16 +38,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/strategy", strategyRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/contact", contactRoutes);
 initSocket(server);
 
 // =====================
 // DATABASE CONNECTION
 // =====================
 mongoose
-  .connect(
-    MONGO_URI,
-    {},
-  )
+  .connect(MONGO_URI, {})
   .then(() => console.log("✅ Mongo Connected"))
   .catch((err) => {
     console.error("❌ Mongo Error:", err);

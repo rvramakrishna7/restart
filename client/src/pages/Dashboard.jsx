@@ -146,7 +146,7 @@ const Dashboard = () => {
             <div className="broker-banner-text">
               <div className="broker-banner-title">Connect your broker</div>
               <div className="broker-banner-sub">
-                Link your Zerodha account to fetch live prices and execute trades.
+                Link your broker account to fetch live prices and execute trades.
               </div>
             </div>
             <button className="primary-btn" onClick={handleConnectBroker}>

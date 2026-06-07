@@ -290,3 +290,49 @@
     font-size: 18px;
   }
 }
+
+.landing-login {
+  margin-top: 22px;
+  width: 100%;
+  max-width: 340px;
+  text-align: left;
+}
+.landing-login .landing-buttons {
+  margin-top: 18px;
+}
+
+/* style the login inputs on the landing page (mirror auth box) */
+.landing-login .auth-field {
+  margin-bottom: 14px;
+}
+.landing-login .auth-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.landing-login input {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 11px;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.landing-login input::placeholder {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+.landing-login input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}

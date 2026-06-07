@@ -1,14 +1,38 @@
+import { useState,useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../api/axios";
+import toast from "react-hot-toast";
 import "../styles.css";
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
-  // "","","","","","","","",
-  // "","","","","","","",
-  // "","","","","","","",
-  // "","","","","","",""
-  // ];
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast.error("Please enter your email and password");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await axios.post("/api/auth/login", { email, password });
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("userId", res.data.user._id);
+      localStorage.setItem("email", res.data.user.email);
+
+      toast.success("Login successful");
+      window.location.href = "/dashboard";
+    } catch (err) {
+      toast.error(err.response?.data?.msg || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const icons = [
     // Trend Up
@@ -63,34 +87,39 @@ const LandingPage = () => {
 
   const getRandomIcon = () => icons[Math.floor(Math.random() * icons.length)];
 
+  
+  const bgIcons = useMemo(
+    () =>
+      Array.from({ length: 160 }).map((_, i) => {
+        const rotation = Math.random() * 360;
+        const scale = 1 + Math.random() * 1.2;
+        const top = Math.random() * 100;
+        const left = Math.random() * 100;
+        const opacity = 0.15 + Math.random() * 0.35;
+        return (
+          <span
+            key={i}
+            className="bg-icon"
+            style={{
+              top: `${top}%`,
+              left: `${left}%`,
+              "--rotate": `${rotation}deg`,
+              "--scale": scale,
+              opacity: opacity,
+            }}
+          >
+            {getRandomIcon()}
+          </span>
+        );
+      }),
+    []
+  );
+
   return (
     <div className="landing-clean">
       {/* BACKGROUND */}
-      <div className="bg-pattern">
-        {Array.from({ length: 160 }).map((_, i) => {
-          const rotation = Math.random() * 360;
-          const scale = 1 + Math.random() * 1.2;
-          const top = Math.random() * 100;
-          const left = Math.random() * 100;
-          const opacity = 0.15 + Math.random() * 0.35;
-
-          return (
-            <span
-              key={i}
-              className="bg-icon"
-              style={{
-                top: `${top}%`,
-                left: `${left}%`,
-                "--rotate": `${rotation}deg`,
-                "--scale": scale,
-                opacity: opacity,
-              }}
-            >
-              {getRandomIcon()}
-            </span>
-          );
-        })}
-      </div>
+    
+      <div className="bg-pattern">{bgIcons}</div>
 
       {/* CONTENT */}
       <div className="landing-content">
@@ -100,14 +129,46 @@ const LandingPage = () => {
 
         <p>Automated Options Trading Platform</p>
 
-        <div className="landing-buttons">
-          <button className="primary-btn" onClick={() => navigate("/login")}>
-            Login
-          </button>
+        {/* ── LOGIN FORM (merged in) ── */}
+        <div className="landing-login">
+          <div className="auth-field">
+            <label>Email</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            />
+          </div>
 
-          <button className="secondary-btn" onClick={() => navigate("/signup")}>
-            Signup
-          </button>
+          <div className="auth-field">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+            />
+          </div>
+
+          <div className="landing-buttons">
+            <button
+              className="primary-btn"
+              onClick={handleLogin}
+              disabled={loading}
+            >
+              {loading ? "Logging in…" : "Log in"}
+            </button>
+
+            <button
+              className="secondary-btn"
+              onClick={() => navigate("/signup")}
+            >
+              Sign up
+            </button>
+          </div>
         </div>
       </div>
     </div>

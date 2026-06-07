@@ -43,7 +43,7 @@ const Login = () => {
           </svg>
         </div>
 
-        <h2>Welcome back</h2>
+        <h2>Let's Restart Options</h2>
         <p className="auth-sub">Log in to your Restart account</p>
 
         <div className="auth-field">

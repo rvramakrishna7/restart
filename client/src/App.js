@@ -3,11 +3,12 @@ import React from "react";
 
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import StrategySelection from "./pages/StrategySelection";
 import Analytics from "./pages/Analytics";
 import BrokerAccess from "./pages/BrokerAccess";
+import Product from "./pages/Product";
+import Contact from "./pages/Contact";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -50,9 +51,12 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Product />} />
+        <Route path="/start" element={<LandingPage />} />
+        <Route path="/login" element={<Navigate to="/start" />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/product" element={<Navigate to="/" />} />
 
         <Route
           path="/strategies"
