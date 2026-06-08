@@ -72,11 +72,6 @@ const Login = () => {
           {loading ? "Logging in…" : "Log in"}
         </button>
 
-        <div className="auth-divider">or</div>
-
-        <button className="secondary-btn" onClick={() => navigate("/signup")}>
-          Don't have an account? Sign up
-        </button>
       </div>
     </div>
   );

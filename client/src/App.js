@@ -9,6 +9,7 @@ import Analytics from "./pages/Analytics";
 import BrokerAccess from "./pages/BrokerAccess";
 import Product from "./pages/Product";
 import Contact from "./pages/Contact";
+import Admin from "./pages/Admin";
 
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -55,8 +56,16 @@ function App() {
         <Route path="/start" element={<LandingPage />} />
         <Route path="/login" element={<Navigate to="/start" />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/signup" element={<Navigate to="/start" />}  />
         <Route path="/product" element={<Navigate to="/" />} />
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <Admin />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/strategies"

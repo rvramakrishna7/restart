@@ -188,6 +188,10 @@ const Navbar = () => {
           <span onClick={() => navigate("/dashboard")}>Dashboard</span>
           <span onClick={() => navigate("/strategies")}>Strategies</span>
           <span onClick={() => navigate("/analytics")}>Analytics</span>
+          {localStorage.getItem("email") ===
+            (process.env.REACT_APP_OWNER_EMAIL || "test@gmail.com") && (
+            <span onClick={() => navigate("/admin")}>Admin</span>
+          )}
         </div>
 
         {/* MARKET */}

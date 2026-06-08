@@ -10,6 +10,7 @@ const userRoutes = require("./api/routes/userRoutes");
 const analyticsRoutes = require("./api/routes/analyticsRoutes");
 const authRoutes = require("./api/routes/authRoutes");
 const contactRoutes = require("./api/routes/contactRoutes");
+const adminRoutes = require("./api/routes/adminRoutes");
 const { initWebSocket } = require("./services/websocketService");
 const { initSocket } = require("./services/socketServer");
 
@@ -39,6 +40,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/strategy", strategyRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/admin", adminRoutes);
 initSocket(server);
 
 // =====================

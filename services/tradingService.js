@@ -607,6 +607,7 @@ async function executeStraddle({
 
   // ── build position ──
   const position = {
+    userId,
     strategyType:          "INTRADAY_STRADDLE",
     index:                 instrument,
     expiry:                formattedExpiry,
@@ -819,6 +820,7 @@ async function executeStrangle({
   logger.log(`✅ Strangle executed | CE ${bestCE.strike}@${ceResult.avgPrice} | PE ${bestPE.strike}@${peResult.avgPrice}`);
   require("./notify").sendAlert(`🎯 STRANGLE entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
   const position = {
+    userId,
     strategyType:          "INTRADAY_STRANGLE",
     index:                 instrument,
     expiry:                formattedExpiry,
@@ -997,6 +999,7 @@ async function executeIronFly({
   logger.log(`✅ Iron fly executed | CE sell@${ceSellResult.avgPrice} PE sell@${peSellResult.avgPrice} CE buy@${ceBuyResult.avgPrice} PE buy@${peBuyResult.avgPrice}`);
   require("./notify").sendAlert(`🎯 IRON FLY entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
   const position = {
+    userId,
     strategyType:      "IRON_FLY",
     index:             instrument,
     expiry:            formattedExpiry,

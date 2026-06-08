@@ -123,7 +123,7 @@ const LandingPage = () => {
 
       {/* CONTENT */}
       <div className="landing-content">
-        <h1>Restart Options</h1>
+        <h1>RESTART </h1><br/>
 
         <div className="landing-tagline">Zero se kar restart</div>
 
@@ -162,12 +162,7 @@ const LandingPage = () => {
               {loading ? "Logging in…" : "Log in"}
             </button>
 
-            <button
-              className="secondary-btn"
-              onClick={() => navigate("/signup")}
-            >
-              Sign up
-            </button>
+            
           </div>
         </div>
       </div>
