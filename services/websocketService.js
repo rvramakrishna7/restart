@@ -36,27 +36,24 @@ function initWebSocket(accessToken, tokens, onTick) {
   ticker.connect();
 
   ticker.on("connect", () => {
-    if (global.wsStarted) {
-      logger.log("📡 WS reconnect duplicate — skipping resubscribe");
-      return;
-    }
     logger.log("📡 WebSocket Connected");
     global._positionErrorLogged = false;
     global._marketErrorLogged   = false;
-    global.wsStarted = true;
 
     const INDEX_TOKENS = [256265, 260105];
-    // ── on reconnect, restore all previously known tokens ──
-    // currentTokens has all position tokens from before disconnect
+    // ALWAYS subscribe on connect — this is the only moment the socket is
+    // guaranteed open. Runs on first connect AND every reconnect, so the
+    // index tokens can never be silently dropped.
     const finalTokens = [...new Set([...(currentTokens || []), ...(tokens || []), ...INDEX_TOKENS])];
 
-    if (finalTokens.length > 0) {
-      logger.log("📡 WS Tokens (reconnect):", finalTokens);
-      if (!ticker) return;
+    if (finalTokens.length > 0 && ticker) {
+      logger.log("📡 WS Tokens (on connect):", finalTokens);
       ticker.subscribe(finalTokens);
       ticker.setMode(ticker.modeLTP, finalTokens);
       currentTokens = finalTokens;
     }
+
+    global.wsStarted = true;
   });
 
   ticker.on("ticks", (ticks) => {
@@ -110,14 +107,22 @@ function initWebSocket(accessToken, tokens, onTick) {
 function updateSubscription(newTokens) {
   logger.log("UPDATE SUB CALLED:", newTokens);
 
-  // ── CRITICAL FIX: guard against null ticker ──
   if (!ticker) {
     logger.log("⚠️ updateSubscription called but ticker is null — skipping");
     return;
   }
 
-  const toUnsubscribe = currentTokens.filter((t) => !newTokens.includes(t));
-  const toSubscribe   = newTokens.filter((t) => !currentTokens.includes(t));
+  const INDEX_TOKENS = [256265, 260105];
+
+  const toUnsubscribe = currentTokens.filter(
+    (t) => !newTokens.includes(t) && !INDEX_TOKENS.includes(t), // never unsubscribe the index
+  );
+  let toSubscribe = newTokens.filter((t) => !currentTokens.includes(t));
+
+  // ── ALWAYS (re)subscribe the index tokens — idempotent, guarantees spot streams ──
+  for (const idx of INDEX_TOKENS) {
+    if (!toSubscribe.includes(idx)) toSubscribe.push(idx);
+  }
 
   if (toUnsubscribe.length) {
     ticker.unsubscribe(toUnsubscribe);
@@ -129,12 +134,10 @@ function updateSubscription(newTokens) {
     logger.log("📡 Subscribed Tokens:", toSubscribe);
   }
 
-  if (!newTokens.length) return;
-
-  currentTokens = newTokens;
+  // keep index tokens in the bookkeeping set always
+  currentTokens = [...new Set([...newTokens, ...INDEX_TOKENS])];
   logger.log("📡 Updated Tokens:", currentTokens);
 }
-
 function disconnectWebSocket() {
   if (ticker) {
     try { ticker.disconnect(); } catch (_) {}
