@@ -65,7 +65,7 @@ function _evaluateStraddle(position, currentFuturePrice, _pnl, chain) {
   if (!position || position.isClosed || position.forceExit) return;
   if (!Array.isArray(chain) || !chain.length) return;
 
-  const futurePrice = position.st_currentFuturePrice || currentFuturePrice;
+  const futurePrice = currentFuturePrice || position.st_currentFuturePrice;
   if (!futurePrice || futurePrice <= 0) {
     logger.log("⏳ STRADDLE: futures price not available yet");
     return;
