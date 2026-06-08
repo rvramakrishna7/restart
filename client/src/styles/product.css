@@ -148,14 +148,6 @@
   .rp-scroll-cue {
     display: flex;
   }
-  .rp-act {
-  width: 90%;
-  max-width: 90%;
-  white-space: normal;
-  text-align: center;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
 }
 
 /* dashboard mockup (shared) */
@@ -430,6 +422,7 @@
   .rp-stage { height: auto; padding: 60px 0; }
   .rp-stage-inner { height: auto; width: 92vw; flex-direction: column; gap: 30px; }
   .rp-act { position: relative; top: auto; transform: none; opacity: 1; margin-bottom: 4px; font-size: 14px; white-space: normal; text-align: center; }
+  .rp-act-1 { display: none; }
   .rp-act-2 { display: none; }
   .rp-dash, .rp-pipeline { position: static; width: 100%; margin-top: 0; transform: none; }
   .rp-pipeline { flex-direction: column; }
