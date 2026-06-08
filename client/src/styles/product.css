@@ -148,6 +148,14 @@
   .rp-scroll-cue {
     display: flex;
   }
+  .rp-act {
+  width: 90%;
+  max-width: 90%;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
 }
 
 /* dashboard mockup (shared) */

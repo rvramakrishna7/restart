@@ -204,8 +204,8 @@ const Product = () => {
             </span>
           </h1>
           <p className="rp-hero-sub">
-            Build. Test. Automate. Restart Options helps traders transform rule-based option
-            strategies into disciplined systems.<br/> No fear. No greed. No hesitation. Just execution.
+            Build. Test. Automate. <br/> Most traders know their rules. The problem is following them. <br/>
+            Restart Options transforms rule-based option strategies into disciplined execution systems.<br/> No fear. No greed. No hesitation. Just execution.
           </p>
           
         </div>
@@ -248,8 +248,8 @@ const Product = () => {
       {/* ===== PINNED SCROLL STORY ===== */}
       <section className="rp-stage" id="story">
         <div className="rp-stage-inner">
-          <div className="rp-act rp-act-1">From rules to analysis and execution...</div>
-          <div className="rp-act rp-act-2">Discipline executing every decision</div>
+          <div className="rp-act rp-act-1">From strategy to execution...</div>
+          <div className="rp-act rp-act-2">Discipline executing every decision...</div>
 
           <div className="rp-dash">
             <div className="rp-dash-bar">
@@ -411,7 +411,7 @@ const Product = () => {
             <div className="rp-fail-card">Ignore risk limits</div>
             <div className="rp-fail-card">Trade emotionally</div>
           </div>
-          <div className="rp-fail-footer">Automation eliminates these mistakes.</div>
+          <div className="rp-fail-footer">Automation eliminates these mistakes and guarantees discipline..</div>
         </div>
       </section>
 
