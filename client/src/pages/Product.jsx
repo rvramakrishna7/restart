@@ -207,11 +207,7 @@ const Product = () => {
             Build. Test. Automate. Restart Options helps traders transform rule-based option
             strategies into disciplined systems.<br/> No fear. No greed. No hesitation. Just execution.
           </p>
-          <div className="rp-hero-actions">
-            <button className="rp-btn-primary" onClick={() => navigate("/contact")}>
-              Lets start
-            </button>
-          </div>
+          
         </div>
         {/* ===== SCROLL CUE — animated candle ===== */}
 <div className="rp-scroll-cue candle-green" ref={(el) => {

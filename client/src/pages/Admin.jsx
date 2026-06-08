@@ -3,6 +3,14 @@ import axios from "../api/axios";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+const inputStyle = {
+  padding: "10px 12px",
+  border: "1px solid #e2e8f0",
+  borderRadius: 8,
+  fontSize: 14,
+  outline: "none",
+};
+
 // Owner-only CRM. Backend already enforces owner via OWNER_EMAIL, so even if a
 // non-owner reaches this route the API calls return 403 and panels stay empty.
 export default function Admin() {
@@ -12,6 +20,11 @@ export default function Admin() {
   const [positions, setPositions] = useState([]);
   const [tab, setTab] = useState("contacts");
   const [loading, setLoading] = useState(true);
+
+  // create-user form
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
+  const [createMsg, setCreateMsg] = useState("");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     fetchAll();
@@ -59,6 +72,32 @@ export default function Admin() {
     }
   };
 
+  const createUser = async () => {
+    setCreateMsg("");
+    if (!newUser.email || !newUser.password) {
+      setCreateMsg("Email and password are required.");
+      return;
+    }
+    if (newUser.password.length < 6) {
+      setCreateMsg("Password must be at least 6 characters.");
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await axios.post("/api/auth/create-user", newUser);
+      if (res.data.success) {
+        setCreateMsg(`✓ Created ${res.data.user.email}`);
+        setNewUser({ name: "", email: "", password: "" });
+        fetchAll(); // refresh users list + stats
+      } else {
+        setCreateMsg(res.data.msg || "Could not create user.");
+      }
+    } catch (err) {
+      setCreateMsg(err.response?.data?.msg || "Could not create user.");
+    }
+    setCreating(false);
+  };
+
   return (
     <>
       <Navbar />
@@ -94,6 +133,12 @@ export default function Admin() {
             onClick={() => setTab("positions")}
           >
             Live Positions
+          </button>
+          <button
+            className={`primary-btn ${tab !== "create" ? "secondary-btn" : ""}`}
+            onClick={() => setTab("create")}
+          >
+            + Create User
           </button>
         </div>
 
@@ -231,6 +276,63 @@ export default function Admin() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+        {/* CREATE USER */}
+        {tab === "create" && (
+          <div className="section-block">
+            <h3 className="section-title">Create New User (Invite-Only)</h3>
+            <div
+              style={{
+                maxWidth: 420,
+                display: "flex",
+                flexDirection: "column",
+                gap: 12,
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Name"
+                value={newUser.name}
+                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                style={inputStyle}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                style={inputStyle}
+              />
+              <input
+                type="text"
+                placeholder="Password (min 6 chars)"
+                value={newUser.password}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
+                style={inputStyle}
+              />
+              <button
+                className="primary-btn"
+                onClick={createUser}
+                disabled={creating}
+              >
+                {creating ? "Creating…" : "Create User"}
+              </button>
+              {createMsg && (
+                <div
+                  className={createMsg.startsWith("✓") ? "profit" : "loss"}
+                  style={{ fontWeight: 600 }}
+                >
+                  {createMsg}
+                </div>
+              )}
+              <p style={{ color: "#64748b", fontSize: 13, marginTop: 4 }}>
+                Share these credentials with the user. They'll log in, set up
+                their broker, and land on their dashboard.
+              </p>
             </div>
           </div>
         )}
