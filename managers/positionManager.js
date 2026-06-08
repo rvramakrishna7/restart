@@ -557,31 +557,28 @@ class PositionManager {
       }
 
       const now = Date.now();
-      // throttle chain fetch to once every 15s (Kite LTP is rate-limited ~3/s)
-      if (shouldFetch && now - this.lastChainFetch > 10000) {
+      if (shouldFetch && now - this.lastChainFetch > 10000 && !this._chainFetching) {
+        this.lastChainFetch = now;   // claim the slot BEFORE awaiting (prevents concurrent fetches)
+        this._chainFetching = true;  // hard re-entry lock across ticks
         try {
-          // cache the broker token for 60s instead of hitting Mongo every fetch
-          if (!this._cachedToken || now - (this._tokenCachedAt || 0) > 60000) {
-            const freshUser = await require("../api/models/User").findOne({
-              "broker.connected": true,
-            });
-            this._cachedToken = freshUser?.broker?.accessToken || position.token;
-            this._tokenCachedAt = now;
-          }
-          const freshToken = this._cachedToken || position.token;
+          // ── always use fresh token from DB, not stale position.token ──
+          const freshUser = await require("../api/models/User").findOne({
+            "broker.connected": true,
+          });
+          const freshToken = freshUser?.broker?.accessToken || position.token;
           this.latestChain = await getOptionChain(
             position.index,
             position.expiry,
             freshToken,
           );
-          this.lastChainFetch = now;
         } catch (err) {
           if (!err.message.includes("Failed to fetch LTP")) {
             logger.log("⚠️ Chain fetch error:", err.message);
           }
+        } finally {
+          this._chainFetching = false;  // release lock
         }
       }
-
       // ── Snapshot before adjustment ──
       const beforeAdjustment = JSON.stringify({
         buyToken: position.buyToken,
