@@ -62,6 +62,14 @@ function initWebSocket(accessToken, tokens, onTick) {
   ticker.on("ticks", (ticks) => {
     if (!ticks || !ticks.length) return;
     const spotTick = ticks.find(t => t.instrument_token === 256265 || t.instrument_token === 260105);
+    // ── TEMP PROBE: is the index actually streaming? ──
+    if (!global._tickProbeAt || Date.now() - global._tickProbeAt > 5000) {
+      global._tickProbeAt = Date.now();
+      logger.log(
+        "🔎 TICK PROBE | tokens in batch:", ticks.map(t => t.instrument_token),
+        "| 256265 price:", spotTick ? spotTick.last_price : "NOT PRESENT"
+      );
+    }
 
     // 1. original engine callback
     onTick(ticks);
