@@ -10,13 +10,16 @@ const zerodhaService = require("../services/zerodhaService");
 const PositionModel = require("../api/models/Position");
 
 function isMarketOpen() {
-  const now = new Date();
-  const day = now.getDay();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  if (day === 0 || day === 6) return false;
-  if (hour < 9 || (hour === 9 && minute < 15)) return false;
-  if (hour > 15 || (hour === 15 && minute > 30)) return false;
+  // Compute current time in IST regardless of server timezone (Render = UTC)
+  const nowUTC = new Date();
+  const istMs = nowUTC.getTime() + (5 * 60 + 30) * 60 * 1000; // +5:30
+  const ist = new Date(istMs);
+  const day = ist.getUTCDay();      // use UTC getters on the shifted time
+  const hour = ist.getUTCHours();
+  const minute = ist.getUTCMinutes();
+  if (day === 0 || day === 6) return false;             // Sun/Sat
+  if (hour < 9 || (hour === 9 && minute < 15)) return false;  // before 09:15
+  if (hour > 15 || (hour === 15 && minute > 30)) return false; // after 15:30
   return true;
 }
 
