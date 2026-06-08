@@ -432,7 +432,12 @@ async function executeStrategy({
       throw new Error("SELL failed");
     }
 
-    logger.log("✅ Spread fully executed");
+    logger.log(
+      `✅ Debit Spread executed | ${direction === "BULLISH" ? "BULL_CALL" : "BEAR_PUT"} | BUY ${buySymbol} @ ${buyResult.avgPrice} | SELL ${sellSymbol} @ ${sellResult.avgPrice}`,
+    );
+    require("./notify").sendAlert(
+      `🎯 ${direction === "BULLISH" ? "BULL CALL" : "BEAR PUT"} SPREAD entered | ${instrument} | BUY ${buyStrike} / SELL ${sellStrike} | qty ${qty}`,
+    );
 
     // =====================
     // START STRATEGY
