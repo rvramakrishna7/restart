@@ -557,13 +557,18 @@ class PositionManager {
       }
 
       const now = Date.now();
-      if (shouldFetch && now - this.lastChainFetch > 5000) {
+      // throttle chain fetch to once every 15s (Kite LTP is rate-limited ~3/s)
+      if (shouldFetch && now - this.lastChainFetch > 10000) {
         try {
-          // ── always use fresh token from DB, not stale position.token ──
-          const freshUser = await require("../api/models/User").findOne({
-            "broker.connected": true,
-          });
-          const freshToken = freshUser?.broker?.accessToken || position.token;
+          // cache the broker token for 60s instead of hitting Mongo every fetch
+          if (!this._cachedToken || now - (this._tokenCachedAt || 0) > 60000) {
+            const freshUser = await require("../api/models/User").findOne({
+              "broker.connected": true,
+            });
+            this._cachedToken = freshUser?.broker?.accessToken || position.token;
+            this._tokenCachedAt = now;
+          }
+          const freshToken = this._cachedToken || position.token;
           this.latestChain = await getOptionChain(
             position.index,
             position.expiry,
