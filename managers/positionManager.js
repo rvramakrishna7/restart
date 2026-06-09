@@ -8,6 +8,9 @@ const {
 } = require("../services/websocketService");
 const zerodhaService = require("../services/zerodhaService");
 const PositionModel = require("../api/models/Position");
+const { sendAlert } = require("../services/notify");
+const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 
 function isMarketOpen() {
   // Compute current time in IST regardless of server timezone (Render = UTC)
@@ -525,7 +528,6 @@ class PositionManager {
       if (position.forceExit && !position.isClosed) {
         logger.log("🚨 MAX LOSS — auto closing position");
         await this.recordClosedTrade(position, "MAX_LOSS");
-        require("../services/notify").sendAlert(`🚨 MAX LOSS | ${position.index} | position closed | PnL ₹${position.pnl}`);
         position.isClosed = true;
         position.isActive = false;
         if (position._id) {
@@ -696,7 +698,11 @@ class PositionManager {
 
       if (adjustmentChanged) {
         logger.log("🔄 Adjustment Detected → Refreshing Tokens");
-        require("../services/notify").sendAlert(`🔄 Adjustment | ${position.index} | position adjusted | PnL ₹${position.pnl}`);
+        const st = position.strategyType;
+        // straddle/strangle send their own detailed alert from the engine
+        if (st !== "INTRADAY_STRADDLE" && st !== "INTRADAY_STRANGLE") {
+          require("../services/notify").sendAlert(`🔄 Adjustment | ${position.index} | position adjusted | PnL ₹${position.pnl}`);
+        }
         this.updateTokens();
       }
 
@@ -788,7 +794,6 @@ class PositionManager {
       const totalPnl = buyPnl + sellPnl;
 
       await this.recordClosedTrade(position, "TARGET_SL");
-      require("../services/notify").sendAlert(`✅ EXIT | ${position.index} | position closed | PnL ₹${position.pnl}`);
       position.isClosed = true;
       if (position._id) {
         await PositionModel.findByIdAndUpdate(position._id, {
@@ -878,6 +883,19 @@ class PositionManager {
       }
 
       netPnl = Number(netPnl.toFixed(2));
+
+      // ── detailed exit alert (covers all strategies, all exit reasons) ──
+      try {
+        const lines = legs
+          .map(
+            (l) =>
+              `${l.type} ${l.symbol || ""} @ ${money(l.exitPrice)} (entry ${money(l.entryPrice)} → ${signed(l.pnl)})`,
+          )
+          .join("\n");
+        sendAlert(
+          `🚪 ${strategyLabel} EXITED | ${position.index} | reason: ${reason}\n${lines}\nNet P&L: ${signed(netPnl)}`,
+        );
+      } catch (e) {}
 
       await Trade.create({
         userId: position.userId,

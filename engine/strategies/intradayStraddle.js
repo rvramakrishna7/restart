@@ -12,6 +12,9 @@ const logger = require("../../utils/logger");
 // =====================================================================
 
 const { STRADDLE } = require("../../config/constants");
+const { sendAlert } = require("../../services/notify");
+const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 
 // ── Get move threshold from combined entry premium ──
 function getMoveThreshold(index, entryPremium) {
@@ -120,6 +123,7 @@ function _evaluateStraddle(position, currentFuturePrice, _pnl, chain) {
   // ── THRESHOLD HIT ──
   const movedUp = move > 0;
   const legs = position.st_legs || [];
+  const legsCountBefore = legs.length;
   const open = legs.filter((l) => !l.closed);
   const ceLeg = open.find((l) => l.type === "CE");
   const peLeg = open.find((l) => l.type === "PE");
@@ -336,6 +340,41 @@ function _evaluateStraddle(position, currentFuturePrice, _pnl, chain) {
       });
     }
   }
+  // ── detailed Telegram alert if an adjustment actually fired this pass ──
+  if (legs.length > legsCountBefore) {
+    try {
+      const newLeg = legs[legs.length - 1];
+      const closedLegs = legs.filter((l) => l.closed && l.closedAt);
+      const exitedLeg = closedLegs.sort(
+        (a, b) => new Date(b.closedAt) - new Date(a.closedAt),
+      )[0];
+      const openNow = legs.filter((l) => !l.closed);
+      const isStrangleNow =
+        openNow.length === 2 && openNow[0].strike !== openNow[1].strike;
+      const shape = isStrangleNow ? "STRANGLE" : "STRADDLE";
+      const ceNow = openNow.find((l) => l.type === "CE");
+      const peNow = openNow.find((l) => l.type === "PE");
+      const legPnl = exitedLeg
+        ? (exitedLeg.entryPremium - exitedLeg.exitPrice) * qty
+        : 0;
+      const netPnl = calcTotalPnl(position);
+
+      sendAlert(
+        `🔄 STRADDLE ADJUSTMENT | ${index}\n` +
+        `Reason: spot moved ${movedUp ? "UP" : "DOWN"} ${Math.abs(move).toFixed(1)} pts ` +
+        `(ref ${refPrice} → ${futurePrice}, threshold ±${threshold})\n` +
+        (exitedLeg
+          ? `Exited: ${exitedLeg.type} ${exitedLeg.strike} @ ${money(exitedLeg.exitPrice)} ` +
+            `(entry ${money(exitedLeg.entryPremium)} → ${signed(legPnl)})\n`
+          : "") +
+        `New leg: SELL ${newLeg.type} ${newLeg.strike} @ ${money(newLeg.entryPremium)} (chain LTP at open)\n` +
+        `Now: ${shape}` +
+        (ceNow && peNow ? ` | CE ${ceNow.strike} / PE ${peNow.strike}` : "") +
+        `\nNet P&L: ${signed(netPnl)}`,
+      );
+    } catch (e) {}
+  }
+
   position._straddleAdjustedAt = Date.now();
   position.st_legs = legs;
 }

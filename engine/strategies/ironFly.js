@@ -1,4 +1,7 @@
 const logger = require("../../utils/logger");
+const { sendAlert } = require("../../services/notify");
+const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 // =====================================================================
 // IRON FLY — Adjustment Engine
 // =====================================================================
@@ -266,6 +269,12 @@ function _evaluateIronFly(position, currentFutures, pnl, chain) {
           message: `CE wing shifted ${ceBuy.strike} → ${targetCE} via 20% rule`,
           time:    new Date().toISOString(),
         });
+        try {
+          sendAlert(
+            `🔄 IRON FLY RULE 2 (CE wing) | ${position.index}\n` +
+            `Shifted CE wing ${ceBuy.strike} → ${targetCE} @ ${money(entryPremium)} (20% rule)`,
+          );
+        } catch (e) {}
       }
     }
   }
@@ -297,6 +306,12 @@ function _evaluateIronFly(position, currentFutures, pnl, chain) {
           message: `PE wing shifted ${peBuy.strike} → ${targetPE} via 20% rule`,
           time:    new Date().toISOString(),
         });
+        try {
+          sendAlert(
+            `🔄 IRON FLY RULE 2 (PE wing) | ${position.index}\n` +
+            `Shifted PE wing ${peBuy.strike} → ${targetPE} @ ${money(entryPremium)} (20% rule)`,
+          );
+        } catch (e) {}
       }
     }
   }
@@ -380,6 +395,14 @@ function _evaluateIronFly(position, currentFutures, pnl, chain) {
         message: `Lower BE ${lowerBE} hit. PE wing moved from ${oldPeBuy?.strike} → ${lowerBE}`,
         time:    new Date().toISOString(),
       });
+      try {
+        sendAlert(
+          `🔄 IRON FLY RULE 1 (PE side) | ${position.index}\n` +
+          `Reason: lower BE ${lowerBE} hit (futures ${currentFutures.toFixed(0)}, BS loss ${signed(peSidePnL)})\n` +
+          `PE wing moved: ${oldPeBuy?.strike} → ${lowerBE} @ ${money(position.if_peBuy?.entryPremium)}\n` +
+          `Realized loss so far: ${money(position.if_realizedLoss)}`,
+        );
+      } catch (e) {}
 
       // ── RULE 3: broken wing fly on PE side ──
       if (!position.if_bwActive) {
@@ -480,6 +503,14 @@ function _evaluateIronFly(position, currentFutures, pnl, chain) {
         message: `Upper BE ${upperBE} hit. CE wing moved from ${oldCeBuy?.strike} → ${upperBE}`,
         time:    new Date().toISOString(),
       });
+      try {
+        sendAlert(
+          `🔄 IRON FLY RULE 1 (CE side) | ${position.index}\n` +
+          `Reason: upper BE ${upperBE} hit (futures ${currentFutures.toFixed(0)}, BS loss ${signed(ceSidePnL)})\n` +
+          `CE wing moved: ${oldCeBuy?.strike} → ${upperBE} @ ${money(position.if_ceBuy?.entryPremium)}\n` +
+          `Realized loss so far: ${money(position.if_realizedLoss)}`,
+        );
+      } catch (e) {}
 
       // ── RULE 3: broken wing fly on CE side ──
       if (!position.if_bwActive) {

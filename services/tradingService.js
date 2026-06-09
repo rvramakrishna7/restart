@@ -18,6 +18,8 @@ const User = require("../api/models/User");
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const r = (n) => Number((n || 0).toFixed(2));
+const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 
 function safePrice(price, type) {
   if (!price) return 1;
@@ -436,7 +438,10 @@ async function executeStrategy({
       `✅ Debit Spread executed | ${direction === "BULLISH" ? "BULL_CALL" : "BEAR_PUT"} | BUY ${buySymbol} @ ${buyResult.avgPrice} | SELL ${sellSymbol} @ ${sellResult.avgPrice}`,
     );
     require("./notify").sendAlert(
-      `🎯 ${direction === "BULLISH" ? "BULL CALL" : "BEAR PUT"} SPREAD entered | ${instrument} | BUY ${buyStrike} / SELL ${sellStrike} | qty ${qty}`,
+      `🎯 ${direction === "BULLISH" ? "BULL CALL" : "BEAR PUT"} SPREAD ENTERED | ${instrument}\n` +
+      `BUY ${spread.buyStrike} @ ${money(buyResult.avgPrice)}\n` +
+      `SELL ${spread.sellStrike} @ ${money(sellResult.avgPrice)}\n` +
+      `Net debit: ${money((buyResult.avgPrice || 0) - (sellResult.avgPrice || 0))} | Qty: ${qty} (${lots || 1} lot${(lots || 1) > 1 ? "s" : ""})`,
     );
 
     // =====================
@@ -602,7 +607,13 @@ async function executeStraddle({
   if (!peResult.success) throw new Error("PE SELL failed");
 
   logger.log(`✅ Straddle executed | CE @ ${ceResult.avgPrice} | PE @ ${peResult.avgPrice}`);
-  require("./notify").sendAlert(`🎯 STRADDLE entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
+  require("./notify").sendAlert(
+    `🎯 STRADDLE ENTERED | ${instrument}\n` +
+    `ATM: ${atmStrike}\n` +
+    `SELL CE ${atmStrike} @ ${money(ceResult.avgPrice)}\n` +
+    `SELL PE ${atmStrike} @ ${money(peResult.avgPrice)}\n` +
+    `Qty: ${qty} (${lots || 1} lot${(lots || 1) > 1 ? "s" : ""})`,
+  );
   const entryPremium = (ceResult.avgPrice || 0) + (peResult.avgPrice || 0);
 
   // ── build position ──
@@ -818,7 +829,12 @@ async function executeStrangle({
   if (!peResult.success) throw new Error("PE SELL failed");
 
   logger.log(`✅ Strangle executed | CE ${bestCE.strike}@${ceResult.avgPrice} | PE ${bestPE.strike}@${peResult.avgPrice}`);
-  require("./notify").sendAlert(`🎯 STRANGLE entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
+  require("./notify").sendAlert(
+    `🎯 STRANGLE ENTERED | ${instrument}\n` +
+    `SELL CE ${bestCE.strike} @ ${money(ceResult.avgPrice)}\n` +
+    `SELL PE ${bestPE.strike} @ ${money(peResult.avgPrice)}\n` +
+    `Distance: ${minDist} pts | Qty: ${qty} (${lots || 1} lot${(lots || 1) > 1 ? "s" : ""})`,
+  );
   const position = {
     userId,
     strategyType:          "INTRADAY_STRANGLE",
@@ -997,7 +1013,15 @@ async function executeIronFly({
   if (!peBuyResult.success) throw new Error("PE BUY failed");
 
   logger.log(`✅ Iron fly executed | CE sell@${ceSellResult.avgPrice} PE sell@${peSellResult.avgPrice} CE buy@${ceBuyResult.avgPrice} PE buy@${peBuyResult.avgPrice}`);
-  require("./notify").sendAlert(`🎯 IRON FLY entered | ${instrument} | ATM ${atmStrike} | qty ${qty}`);
+  require("./notify").sendAlert(
+    `🎯 IRON FLY ENTERED | ${instrument}\n` +
+    `ATM: ${atmStrike}\n` +
+    `SELL CE ${atmStrike} @ ${money(ceSellResult.avgPrice)}\n` +
+    `SELL PE ${atmStrike} @ ${money(peSellResult.avgPrice)}\n` +
+    `BUY CE ${ceBuyStrike} @ ${money(ceBuyResult.avgPrice)}\n` +
+    `BUY PE ${peBuyStrike} @ ${money(peBuyResult.avgPrice)}\n` +
+    `Net: ${money(netPremium)} | BE: ${lowerBE}-${upperBE} | Qty: ${qty}`,
+  );
   const position = {
     userId,
     strategyType:      "IRON_FLY",

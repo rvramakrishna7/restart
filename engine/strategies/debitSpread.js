@@ -1,4 +1,7 @@
 const logger = require("../../utils/logger");
+const { sendAlert } = require("../../services/notify");
+const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 // =====================================================================
 // DEBIT SPREAD ADJUSTMENT ENGINE
 // Bull Call Spread / Bear Put Spread
@@ -250,6 +253,15 @@ function _checkDebitSpread(
         message: "Converted to Strangle",
         time: new Date().toISOString(),
       });
+      try {
+        const buyLegLoss = (currentBuyPremium - position.entryPremium) * (position.quantity || 0);
+        sendAlert(
+          `🔁 DEBIT SPREAD → STRANGLE | ${position.index}\n` +
+          `Reason: buy leg hit 50% loss (entry ${money(position.entryPremium)} → ${money(currentBuyPremium)})\n` +
+          `Closed BUY ${position.buyStrike} @ ${money(currentBuyPremium)} (${signed(buyLegLoss)})\n` +
+          `Strangle legs: CE ${position.CE_sell?.strike} @ ${money(position.CE_sell?.premium)} / PE ${position.PE_sell?.strike} @ ${money(position.PE_sell?.premium)}`,
+        );
+      } catch (e) {}
       return;
     }
   }
@@ -369,6 +381,15 @@ function _checkDebitSpread(
               message: `Buy shifted ${buyStrike} → ${otm100} | realized: ${realizedNow.toFixed(0)}`,
               time: new Date().toISOString(),
             });
+            try {
+              sendAlert(
+                `🔄 DEBIT SPREAD SHIFT | ${position.index} | ${position.type}\n` +
+                `Reason: buy leg ITM, profit shift (spot ${spotPrice} crossed ${buyStrike})\n` +
+                `Shifted BUY: ${buyStrike} → ${otm100}\n` +
+                `Old leg exit @ ${money(currentBuyPremium)} | new leg @ ${money(otmTickPrice100)}\n` +
+                `Realized this shift: ${signed(realizedNow)} | Total realized: ${signed(position.realizedProfitFromShifts)}`,
+              );
+            } catch (e) {}
             // ── save old buy leg as closed row for UI ──
             if (!position.closedBuyLegs) position.closedBuyLegs = [];
             position.closedBuyLegs.push({
@@ -439,6 +460,15 @@ function _checkDebitSpread(
                 message: `Buy shifted ${buyStrike} → ${otm50} | realized: ${realizedNow.toFixed(0)}`,
                 time: new Date().toISOString(),
               });
+              try {
+              sendAlert(
+                `🔄 DEBIT SPREAD SHIFT | ${position.index} | ${position.type}\n` +
+                `Reason: buy leg ITM, profit shift (spot ${spotPrice} crossed ${buyStrike})\n` +
+                `Shifted BUY: ${buyStrike} → ${otm50}\n` +
+                `Old leg exit @ ${money(currentBuyPremium)} | new leg @ ${money(otmTickPrice50)}\n` +
+                `Realized this shift: ${signed(realizedNow)} | Total realized: ${signed(position.realizedProfitFromShifts)}`,
+              );
+            } catch (e) {}
               // ── save old buy leg as closed row for UI ──
               if (!position.closedBuyLegs) position.closedBuyLegs = [];
               position.closedBuyLegs.push({
@@ -510,6 +540,15 @@ function _checkDebitSpread(
               message: `Buy shifted ${buyStrike} → ${otm100} | realized: ${realizedNow.toFixed(0)}`,
               time: new Date().toISOString(),
             });
+            try {
+              sendAlert(
+                `🔄 DEBIT SPREAD SHIFT | ${position.index} | ${position.type}\n` +
+                `Reason: buy leg ITM, profit shift (spot ${spotPrice} crossed ${buyStrike})\n` +
+                `Shifted BUY: ${buyStrike} → ${otm100}\n` +
+                `Old leg exit @ ${money(currentBuyPremium)} | new leg @ ${money(otmTickPriceBnf)}\n` +
+                `Realized this shift: ${signed(realizedNow)} | Total realized: ${signed(position.realizedProfitFromShifts)}`,
+              );
+            } catch (e) {}
             // ── save old buy leg as closed row for UI ──
             if (!position.closedBuyLegs) position.closedBuyLegs = [];
             position.closedBuyLegs.push({
@@ -657,6 +696,13 @@ function _checkDebitSpread(
       }
     }
     position._strangleAdjustedAt = Date.now();
+    try {
+      sendAlert(
+        `🔄 STRANGLE CE ADJUST | ${position.index}\n` +
+        `Reason: CE rose to ${money(cePremium)} (threshold ${money(position.basePremium * 1.15)})\n` +
+        `New CE ${position.CE_sell?.strike} @ ${money(position.CE_sell?.premium)} | Net realized: ${signed(position.realizedProfitFromShifts || 0)}`,
+      );
+    } catch (e) {}
     return;
   }
 
@@ -729,6 +775,13 @@ function _checkDebitSpread(
       }
     }
     position._strangleAdjustedAt = Date.now();
+    try {
+      sendAlert(
+        `🔄 STRANGLE PE ADJUST | ${position.index}\n` +
+        `Reason: PE rose to ${money(pePremium)} (threshold ${money(position.basePremium * 1.15)})\n` +
+        `New PE ${position.PE_sell?.strike} @ ${money(position.PE_sell?.premium)} | Net realized: ${signed(position.realizedProfitFromShifts || 0)}`,
+      );
+    } catch (e) {}
     return;
   }
 }

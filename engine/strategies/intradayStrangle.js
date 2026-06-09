@@ -1,4 +1,7 @@
 const logger = require("../../utils/logger");
+const { sendAlert } = require("../../services/notify");
+const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 // =====================================================================
 // INTRADAY STRANGLE — Adjustment Engine
 // =====================================================================
@@ -125,6 +128,16 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       message: `CE ${ceLeg.strike} rose to ${ceCurrent} (was ${ceEntry}). Exited CE@${ceExitPrice}. New CE ${newCEEntry.strike}@${newCEEntry.CE} matching PE LTP ${peCurrent}`,
       time: new Date().toISOString(),
     });
+    try {
+      const legPnl = (ceEntry - ceExitPrice) * qty;
+      sendAlert(
+        `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
+        `Reason: CE rose ${((ceCurrent / ceEntry - 1) * 100).toFixed(0)}% (${money(ceEntry)} → ${money(ceCurrent)})\n` +
+        `Exited CE ${ceLeg.strike} @ ${money(ceExitPrice)} (${signed(legPnl)})\n` +
+        `New CE ${newCEEntry.strike} @ ${money(newCEEntry.CE)} (matching PE LTP ${money(peCurrent)})\n` +
+        `Net P&L: ${signed(position.st_realizedPnl)}`,
+      );
+    } catch (e) {}
 
     position._strangleAdjustedAt = Date.now();
     position.st_legs = legs;
@@ -182,6 +195,16 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       message: `PE ${peLeg.strike} rose to ${peCurrent} (was ${peEntry}). Exited PE@${peExitPrice}. New PE ${newPEEntry.strike}@${newPEEntry.PE} matching CE LTP ${ceCurrent}`,
       time: new Date().toISOString(),
     });
+    try {
+      const legPnl = (peEntry - peExitPrice) * qty;
+      sendAlert(
+        `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
+        `Reason: PE rose ${((peCurrent / peEntry - 1) * 100).toFixed(0)}% (${money(peEntry)} → ${money(peCurrent)})\n` +
+        `Exited PE ${peLeg.strike} @ ${money(peExitPrice)} (${signed(legPnl)})\n` +
+        `New PE ${newPEEntry.strike} @ ${money(newPEEntry.PE)} (matching CE LTP ${money(ceCurrent)})\n` +
+        `Net P&L: ${signed(position.st_realizedPnl)}`,
+      );
+    } catch (e) {}
 
     position._strangleAdjustedAt = Date.now();
     position.st_legs = legs;
