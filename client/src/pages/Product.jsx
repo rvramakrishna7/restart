@@ -461,7 +461,7 @@ const Product = () => {
           research analyst firm. We do not provide buy/sell recommendations or promise any returns.
         </div>
         <div className="rp-footer-bottom">
-          Made with <span className="rp-heart">♥</span> in Mumbai · © {new Date().getFullYear()}{" "}
+          Made with <span className="rp-heart">♥</span> in India · © {new Date().getFullYear()}{" "}
           Restart Options
         </div>
       </footer>

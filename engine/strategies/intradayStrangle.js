@@ -16,6 +16,17 @@ const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 // =====================================================================
 
 const { STRANGLE } = require("../../config/constants");
+// ── Total PnL: realized from closed legs + unrealized from open legs ──
+function calcTotalPnl(position) {
+  let total = position.st_realizedPnl || 0;
+  for (const leg of position.st_legs || []) {
+    if (leg.closed) continue;
+    const current =
+      leg.currentPrice != null ? leg.currentPrice : leg.entryPremium;
+    total += (leg.entryPremium - current) * (position.quantity || 1);
+  }
+  return Number(total.toFixed(2));
+}
 function evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
   if (position._processing) return;
   position._processing = true;
@@ -56,6 +67,25 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
   }
   // ── cooldown: skip if adjustment fired within last 3 seconds ──
   if (position._strangleAdjustedAt && Date.now() - position._strangleAdjustedAt < 3000) return;
+  // ── MAX LOSS CHECK (same rule as straddle: exit ALL legs) ──
+  const maxLossPerLot = STRANGLE.MAX_LOSS_PER_LOT[position.index];
+  const lots = position.lots || 1;
+  const lotSize = position.lotSize || 1;
+  const maxLossTotal = maxLossPerLot * lots * lotSize;
+
+  const totalPnl = calcTotalPnl(position);
+  position.pnl = totalPnl;
+
+  if (totalPnl <= -maxLossTotal) {
+    logger.log("MAX LOSS HIT STRANGLE:", totalPnl, "<=", -maxLossTotal);
+    position.forceExit = true;
+    position.history.push({
+      type: "MAX_LOSS",
+      message: `Max loss hit. PnL: ${totalPnl}`,
+      time: new Date().toISOString(),
+    });
+    return;
+  }
   const ceEntry = ceLeg.entryPremium;
   const peEntry = peLeg.entryPremium;
 

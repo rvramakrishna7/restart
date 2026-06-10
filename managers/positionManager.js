@@ -9,7 +9,12 @@ const {
 const zerodhaService = require("../services/zerodhaService");
 const PositionModel = require("../api/models/Position");
 const { sendAlert } = require("../services/notify");
-const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n) =>
+  "₹" +
+  Number(n || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 
 function isMarketOpen() {
@@ -17,11 +22,11 @@ function isMarketOpen() {
   const nowUTC = new Date();
   const istMs = nowUTC.getTime() + (5 * 60 + 30) * 60 * 1000; // +5:30
   const ist = new Date(istMs);
-  const day = ist.getUTCDay();      // use UTC getters on the shifted time
+  const day = ist.getUTCDay(); // use UTC getters on the shifted time
   const hour = ist.getUTCHours();
   const minute = ist.getUTCMinutes();
-  if (day === 0 || day === 6) return false;             // Sun/Sat
-  if (hour < 9 || (hour === 9 && minute < 15)) return false;  // before 09:15
+  if (day === 0 || day === 6) return false; // Sun/Sat
+  if (hour < 9 || (hour === 9 && minute < 15)) return false; // before 09:15
   if (hour > 15 || (hour === 15 && minute > 30)) return false; // after 15:30
   return true;
 }
@@ -525,9 +530,32 @@ class PositionManager {
     // ── reset per-tick adjustment flag ──
     for (let position of this.positions) {
       if (position.isClosed) continue;
+
+      // ── 3:20 PM IST auto-exit — intraday straddle/strangle only ──
+      if (
+        !position.forceExit &&
+        (position.strategyType === "INTRADAY_STRADDLE" ||
+          position.strategyType === "INTRADAY_STRANGLE")
+      ) {
+        const istNow = new Date(Date.now() + (5 * 60 + 30) * 60 * 1000);
+        const h = istNow.getUTCHours();
+        const m = istNow.getUTCMinutes();
+        if (h > 15 || (h === 15 && m >= 20)) {
+          logger.log("⏰ 3:20 PM EOD EXIT — closing intraday position");
+          position.forceExit = true;
+          position.exitReason = "EOD_EXIT";
+          (position.history = position.history || []).push({
+            type: "EOD_EXIT",
+            message: "3:20 PM auto-exit",
+            time: new Date().toISOString(),
+          });
+        }
+      }
+
       if (position.forceExit && !position.isClosed) {
-        logger.log("🚨 MAX LOSS — auto closing position");
-        await this.recordClosedTrade(position, "MAX_LOSS");
+        const exitReason = position.exitReason || "MAX_LOSS";
+        logger.log(`🚨 ${exitReason} — auto closing position`);
+        await this.recordClosedTrade(position, exitReason);
         position.isClosed = true;
         position.isActive = false;
         if (position._id) {
@@ -559,9 +587,13 @@ class PositionManager {
       }
 
       const now = Date.now();
-      if (shouldFetch && now - this.lastChainFetch > 10000 && !this._chainFetching) {
-        this.lastChainFetch = now;   // claim the slot BEFORE awaiting (prevents concurrent fetches)
-        this._chainFetching = true;  // hard re-entry lock across ticks
+      if (
+        shouldFetch &&
+        now - this.lastChainFetch > 10000 &&
+        !this._chainFetching
+      ) {
+        this.lastChainFetch = now; // claim the slot BEFORE awaiting (prevents concurrent fetches)
+        this._chainFetching = true; // hard re-entry lock across ticks
         try {
           // ── always use fresh token from DB, not stale position.token ──
           const freshUser = await require("../api/models/User").findOne({
@@ -578,7 +610,7 @@ class PositionManager {
             logger.log("⚠️ Chain fetch error:", err.message);
           }
         } finally {
-          this._chainFetching = false;  // release lock
+          this._chainFetching = false; // release lock
         }
       }
       // ── Snapshot before adjustment ──
@@ -701,7 +733,9 @@ class PositionManager {
         const st = position.strategyType;
         // straddle/strangle send their own detailed alert from the engine
         if (st !== "INTRADAY_STRADDLE" && st !== "INTRADAY_STRANGLE") {
-          require("../services/notify").sendAlert(`🔄 Adjustment | ${position.index} | position adjusted | PnL ₹${position.pnl}`);
+          require("../services/notify").sendAlert(
+            `🔄 Adjustment | ${position.index} | position adjusted | PnL ₹${position.pnl}`,
+          );
         }
         this.updateTokens();
       }
@@ -820,7 +854,8 @@ class PositionManager {
       const qty = position.quantity || 0;
       let legs = [];
       let netPnl = 0;
-      let strategyLabel = position.strategy || position.type || position.strategyType;
+      let strategyLabel =
+        position.strategy || position.type || position.strategyType;
 
       if (
         position.strategyType === "INTRADAY_STRADDLE" ||
@@ -850,14 +885,19 @@ class PositionManager {
           { leg: position.if_peSell, type: "SELL" },
           { leg: position.if_ceBuy, type: "BUY" },
           { leg: position.if_peBuy, type: "BUY" },
-          ...(position.if_bwLegs || []).map((l) => ({ leg: l, type: l.isBuy ? "BUY" : "SELL" })),
+          ...(position.if_bwLegs || []).map((l) => ({
+            leg: l,
+            type: l.isBuy ? "BUY" : "SELL",
+          })),
         ];
         for (const { leg, type } of ifLegs) {
           if (!leg) continue;
-          const exitPrice = leg.exitPrice ?? leg.currentPrice ?? leg.entryPremium;
-          const legPnl = type === "BUY"
-            ? ((exitPrice || 0) - (leg.entryPremium || 0)) * qty
-            : ((leg.entryPremium || 0) - (exitPrice || 0)) * qty;
+          const exitPrice =
+            leg.exitPrice ?? leg.currentPrice ?? leg.entryPremium;
+          const legPnl =
+            type === "BUY"
+              ? ((exitPrice || 0) - (leg.entryPremium || 0)) * qty
+              : ((leg.entryPremium || 0) - (exitPrice || 0)) * qty;
           netPnl += legPnl;
           legs.push({
             symbol: leg.symbol,
@@ -872,13 +912,30 @@ class PositionManager {
       } else {
         // debit spread
         const buyExit = position.currentBuyPrice || position.buyAvgPrice || 0;
-        const sellExit = position.currentSellPrice || position.sellAvgPrice || 0;
+        const sellExit =
+          position.currentSellPrice || position.sellAvgPrice || 0;
         const buyPnl = (buyExit - (position.buyAvgPrice || 0)) * qty;
         const sellPnl = ((position.sellAvgPrice || 0) - sellExit) * qty;
         netPnl = buyPnl + sellPnl + (position.realizedProfitFromShifts || 0);
         legs = [
-          { symbol: position.buySymbol, type: "BUY", qty, entryPrice: position.buyAvgPrice || 0, exitPrice: buyExit, pnl: Number(buyPnl.toFixed(2)), status: "CLOSED" },
-          { symbol: position.sellSymbol, type: "SELL", qty, entryPrice: position.sellAvgPrice || 0, exitPrice: sellExit, pnl: Number(sellPnl.toFixed(2)), status: "CLOSED" },
+          {
+            symbol: position.buySymbol,
+            type: "BUY",
+            qty,
+            entryPrice: position.buyAvgPrice || 0,
+            exitPrice: buyExit,
+            pnl: Number(buyPnl.toFixed(2)),
+            status: "CLOSED",
+          },
+          {
+            symbol: position.sellSymbol,
+            type: "SELL",
+            qty,
+            entryPrice: position.sellAvgPrice || 0,
+            exitPrice: sellExit,
+            pnl: Number(sellPnl.toFixed(2)),
+            status: "CLOSED",
+          },
         ];
       }
 
@@ -917,7 +974,9 @@ class PositionManager {
         netPnl,
       });
 
-      logger.log(`📦 CLOSED trade recorded | ${strategyLabel} | netPnl: ${netPnl} | reason: ${reason}`);
+      logger.log(
+        `📦 CLOSED trade recorded | ${strategyLabel} | netPnl: ${netPnl} | reason: ${reason}`,
+      );
     } catch (err) {
       logger.log("❌ recordClosedTrade error:", err.message);
     }

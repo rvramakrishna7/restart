@@ -146,7 +146,7 @@ and discipline beats emotion.</div>
           SEBI-registered investment adviser or research analyst.
         </div>
         <div className="rp-footer-bottom">
-          Made with <span className="rp-heart">♥</span> in Mumbai · © {new Date().getFullYear()} Restart Options
+          Made with <span className="rp-heart">♥</span> in India · © {new Date().getFullYear()} Restart Options
         </div>
       </footer>
     </div>
