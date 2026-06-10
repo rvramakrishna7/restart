@@ -50,10 +50,7 @@ export default function Analytics() {
   const [expanded, setExpanded] = useState(null);
   const [mode, setMode] = useState("paper");
 
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [hasApplied, setHasApplied] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -188,10 +185,27 @@ export default function Analytics() {
 
           <ModeToggle mode={mode} setMode={setMode} />
 
-          <button className="primary-btn apply-btn" onClick={fetchData}>
+          <button
+            className="primary-btn apply-btn"
+            onClick={() => {
+              setHasApplied(true);
+              fetchData();
+            }}
+          >
             Apply
           </button>
         </div>
+
+        {!hasApplied ? (
+          <div className="analytics-empty" style={{ padding: "60px 0" }}>
+            <div className="analytics-empty-icon">📊</div>
+            <div className="analytics-empty-text">
+              Select a date range and click Apply to view analytics
+            </div>
+          </div>
+        ) : (
+          <>
+        
 
         {/* KPI */}
         <div className="analytics-kpi-row">
@@ -224,11 +238,11 @@ export default function Analytics() {
           </h3>
 
           <div className="chart-grid">
-            <ChartCard title="Equity Curve">
+            <ChartCard title="Equity Curve" width="100%" height={260}>
               {dailyPnl.length === 0 ? (
                 <Empty />
               ) : (
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height={260}>
                   <LineChart data={cumulativeData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -245,7 +259,7 @@ export default function Analytics() {
               )}
             </ChartCard>
 
-            <ChartCard title="Drawdown">
+            <ChartCard title="Drawdown" width="100%" height={260}>
               {dailyPnl.length === 0 ? (
                 <Empty />
               ) : (
@@ -268,7 +282,7 @@ export default function Analytics() {
           <h3 className="section-title">Distribution &amp; Strategy</h3>
 
           <div className="chart-grid">
-            <ChartCard title="Daily PnL">
+            <ChartCard title="Daily PnL" width="100%" height={260}>
               {dailyPnl.length === 0 ? (
                 <Empty />
               ) : (
@@ -284,7 +298,7 @@ export default function Analytics() {
               )}
             </ChartCard>
 
-            <ChartCard title="Strategy Performance">
+            <ChartCard title="Strategy Performance" width="100%" height={260}>
               {Object.keys(strategyData).length === 0 ? (
                 <Empty />
               ) : (
@@ -393,7 +407,10 @@ export default function Analytics() {
               </tbody>
             </table>
           </div>
+          
         </div>
+        </>
+        )}
       </div>
       <Footer />
     </>
