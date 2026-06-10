@@ -188,6 +188,10 @@ export default function Analytics() {
           <button
             className="primary-btn apply-btn"
             onClick={() => {
+              if (!fromDate || !toDate) {
+                alert("Please select both From and To dates.");
+                return;
+              }
               setHasApplied(true);
               fetchData();
             }}
@@ -238,7 +242,7 @@ export default function Analytics() {
           </h3>
 
           <div className="chart-grid">
-            <ChartCard title="Equity Curve" width="100%" height={260}>
+            <ChartCard title="Equity Curve">
               {dailyPnl.length === 0 ? (
                 <Empty />
               ) : (
@@ -259,11 +263,11 @@ export default function Analytics() {
               )}
             </ChartCard>
 
-            <ChartCard title="Drawdown" width="100%" height={260}>
+            <ChartCard title="Drawdown">
               {dailyPnl.length === 0 ? (
                 <Empty />
               ) : (
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height={260}>
                   <LineChart data={getDrawdownData()}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -282,11 +286,11 @@ export default function Analytics() {
           <h3 className="section-title">Distribution &amp; Strategy</h3>
 
           <div className="chart-grid">
-            <ChartCard title="Daily PnL" width="100%" height={260}>
+            <ChartCard title="Daily PnL">
               {dailyPnl.length === 0 ? (
                 <Empty />
               ) : (
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={dailyPnl}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
                     <XAxis dataKey="date" tick={{ fontSize: 11 }} />
@@ -298,11 +302,11 @@ export default function Analytics() {
               )}
             </ChartCard>
 
-            <ChartCard title="Strategy Performance" width="100%" height={260}>
+            <ChartCard title="Strategy Performance">
               {Object.keys(strategyData).length === 0 ? (
                 <Empty />
               ) : (
-                <ResponsiveContainer>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={getStrategyChartData()}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
                     <XAxis dataKey="strategy" tick={{ fontSize: 11 }} />
