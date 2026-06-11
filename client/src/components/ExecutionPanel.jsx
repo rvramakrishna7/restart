@@ -330,6 +330,11 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
     <>
       {/* ── BUTTON — lives inside strategy-row via execute-inline ── */}
       <div className="execute-inline">
+        {hasPositions && !open && (
+          <span className={`exec-mtm ${totalPnl >= 0 ? "profit" : "loss"}`}>
+            <span className="exec-mtm-label">MTM</span> ₹{totalPnl.toFixed(2)}
+          </span>
+        )}
         <button
           className="primary-btn"
           onClick={handleButtonClick}

@@ -136,6 +136,82 @@ export default function Analytics() {
     return (avg / Math.sqrt(variance)).toFixed(2);
   };
 
+  // calendar heatmap ──
+  const cellColor = (pnl) => {
+    if (pnl == null || pnl === 0) return "#ebedf0";
+    if (pnl > 0) {
+      if (pnl < 500) return "#9be9a8";
+      if (pnl < 1500) return "#40c463";
+      if (pnl < 3000) return "#30a14e";
+      return "#216e39";
+    }
+    const a = Math.abs(pnl);
+    if (a < 500) return "#fecaca";
+    if (a < 1500) return "#f87171";
+    if (a < 3000) return "#ef4444";
+    return "#b91c1c";
+  };
+
+  const buildHeatmap = () => {
+    if (!fromDate || !toDate) return { weeks: [], months: [] };
+    const start = new Date(fromDate);
+    const end = new Date(toDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end)
+      return { weeks: [], months: [] };
+
+    const key = (dt) =>
+      `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+
+    const pnlMap = {};
+    dailyPnl.forEach((d) => {
+      const dt = new Date(d.date);
+      if (!isNaN(dt.getTime())) {
+        const k = key(dt);
+        pnlMap[k] = (pnlMap[k] || 0) + d.pnl;
+      }
+    });
+
+    const gridStart = new Date(start);
+    gridStart.setDate(gridStart.getDate() - gridStart.getDay()); // back to Sunday
+    const gridEnd = new Date(end);
+    gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay())); // forward to Saturday
+
+    const weeks = [];
+    const cur = new Date(gridStart);
+    while (cur <= gridEnd) {
+      const week = [];
+      for (let i = 0; i < 7; i++) {
+        const inRange = cur >= start && cur <= end;
+        const k = key(cur);
+        week.push({
+          key: k,
+          inRange,
+          pnl: inRange ? (k in pnlMap ? pnlMap[k] : 0) : null,
+        });
+        cur.setDate(cur.getDate() + 1);
+      }
+      weeks.push(week);
+    }
+
+    const months = [];
+    let lastMonth = -1;
+    weeks.forEach((week, wi) => {
+      const first = week.find((d) => d.inRange);
+      if (first) {
+        const [yy, mm, dd] = first.key.split("-").map(Number);
+        const dt = new Date(yy, mm - 1, dd);
+        if (dt.getMonth() !== lastMonth) {
+          months.push({ wi, label: dt.toLocaleString("en-US", { month: "short" }) });
+          lastMonth = dt.getMonth();
+        }
+      }
+    });
+
+    return { weeks, months };
+  };
+
+  const heatmap = buildHeatmap();
+  
   const streak = getStreakStats();
 
   // Merge the always-on list with any real strategies found in data (no dupes).
@@ -322,24 +398,52 @@ export default function Analytics() {
 
         {/* HEATMAP */}
         <div className="section-block">
-          <h3 className="section-title">Performance Heatmap</h3>
-          {dailyPnl.length === 0 ? (
+          <h3 className="section-title">
+            Performance Heatmap
+            {fromDate && toDate && (
+              <span className="section-title-right">
+                {fromDate} to {toDate}
+              </span>
+            )}
+          </h3>
+          {heatmap.weeks.length === 0 ? (
             <Empty />
           ) : (
-            <div className="heatmap">
-              {dailyPnl.map((d, i) => (
-                <div
-                  key={i}
-                  className="heat-cell"
-                  title={`${d.date}: ₹ ${d.pnl}`}
-                  style={{
-                    background:
-                      d.pnl > 0
-                        ? `rgba(22,163,74,${Math.min(d.pnl / 1000, 1)})`
-                        : `rgba(220,38,38,${Math.min(Math.abs(d.pnl) / 1000, 1)})`,
-                  }}
-                />
-              ))}
+            <div className="zheat-scroll">
+              <div className="zheat">
+                <div className="zheat-grid">
+                  {heatmap.weeks.map((week, wi) => (
+                    <div className="zheat-col" key={wi}>
+                      {week.map((day, di) => (
+                        <div
+                          key={di}
+                          className="zheat-cell"
+                          title={
+                            day.inRange
+                              ? `${day.key}: ₹ ${Number(day.pnl).toLocaleString("en-IN")}`
+                              : ""
+                          }
+                          style={{
+                            background: day.inRange
+                              ? cellColor(day.pnl)
+                              : "transparent",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <div className="zheat-months">
+                  {heatmap.weeks.map((_, wi) => {
+                    const m = heatmap.months.find((mm) => mm.wi === wi);
+                    return (
+                      <div className="zheat-month" key={wi}>
+                        {m ? m.label : ""}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -361,13 +465,14 @@ export default function Analytics() {
                   <th>Strategy</th>
                   <th>Instrument</th>
                   <th>PnL</th>
+                  <th></th>
                 </tr>
               </thead>
 
               <tbody>
                 {history.length === 0 ? (
                   <tr>
-                    <td colSpan="4">
+                    <td colSpan="5">
                       <Empty />
                     </td>
                   </tr>
@@ -379,28 +484,78 @@ export default function Analytics() {
                           setExpanded(expanded === t._id ? null : t._id)
                         }
                       >
-                        <td>{new Date(t.exitTime).toLocaleDateString()}</td>
+                       <td>{new Date(t.exitTime).toLocaleDateString()}</td>
                         <td>{prettyStrategy(t.strategy)}</td>
                         <td>{t.instrument}</td>
                         <td className={t.netPnl >= 0 ? "profit" : "loss"}>
                           ₹ {t.netPnl}
                         </td>
+                        <td className="trade-caret-cell">
+                          <span className={`trade-caret ${expanded === t._id ? "open" : ""}`}>
+                            <svg viewBox="0 0 24 24" width="30" height="30">
+                              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                        </td>
                       </tr>
 
                       {expanded === t._id && (
-                        <tr>
-                          <td colSpan="4">
-                            <div className="trade-expand">
-                              {t.legs?.map((l, i) => (
-                                <div key={i} className="trade-expand-row">
-                                  <span className="trade-expand-label">
-                                    {l.type} {l.symbol}
-                                  </span>
-                                  <span className="trade-expand-value">
-                                    ₹ {l.pnl}
-                                  </span>
-                                </div>
-                              ))}
+                        <tr className="trade-detail-row">
+                          <td colSpan="5">
+                            <div className="trade-detail">
+                              <table className="trade-detail-table">
+                                <thead>
+                                  <tr>
+                                    <th>Type</th>
+                                    <th>Symbol</th>
+                                    <th>Qty</th>
+                                    <th>Entry</th>
+                                    <th>Entry Value</th>
+                                    <th>Exit</th>
+                                    <th>Exit Value</th>
+                                    <th>Realised P&amp;L</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {t.legs?.map((l, i) => {
+                                    const qty = Number(l.qty || 0);
+                                    const entry = Number(l.entryPrice || 0);
+                                    const exit = Number(l.exitPrice || 0);
+                                    const inr = (n) =>
+                                      Number(n || 0).toLocaleString("en-IN", {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      });
+                                    return (
+                                      <tr key={i}>
+                                        <td data-label="Type">
+                                          <span
+                                            className={`leg-badge ${
+                                              String(l.type).startsWith("BUY")
+                                                ? "leg-buy"
+                                                : "leg-sell"
+                                            }`}
+                                          >
+                                            {l.type}
+                                          </span>
+                                        </td>
+                                        <td data-label="Symbol">{l.symbol}</td>
+                                        <td data-label="Qty">{qty}</td>
+                                        <td data-label="Entry">₹ {entry.toFixed(2)}</td>
+                                        <td data-label="Entry Value">₹ {inr(qty * entry)}</td>
+                                        <td data-label="Exit">₹ {exit.toFixed(2)}</td>
+                                        <td data-label="Exit Value">₹ {inr(qty * exit)}</td>
+                                        <td
+                                          data-label="Realised P&L"
+                                          className={Number(l.pnl) >= 0 ? "profit" : "loss"}
+                                        >
+                                          {Number(l.pnl) >= 0 ? "+" : ""}₹ {inr(l.pnl)}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
                             </div>
                           </td>
                         </tr>

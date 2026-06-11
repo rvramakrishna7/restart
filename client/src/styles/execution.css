@@ -24,6 +24,28 @@
   gap: 8px;
   flex-shrink: 0;
 }
+.exec-mtm {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+.exec-mtm.profit { color: #059669; }
+.exec-mtm.loss   { color: #dc2626; }
+.exec-mtm-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
 
 /* ================= EXECUTION PANEL CARD ================= */
 

@@ -291,6 +291,17 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       time: new Date().toISOString(),
     });
 
+    try {
+      const legPnl = (peEntry - peExitPrice) * qty;
+      sendAlert(
+        `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
+        `Reason: PE decayed ${((1 - peCurrent / peEntry) * 100).toFixed(0)}% (${money(peEntry)} → ${money(peCurrent)})\n` +
+        `Booked PE ${peLeg.strike} @ ${money(peExitPrice)} (${signed(legPnl)})\n` +
+        `New PE ${newPEEntry.strike} @ ${money(newPEEntry.PE)} (matching CE LTP ${money(ceCurrent)})\n` +
+        `Net P&L: ${signed(position.st_realizedPnl)}`,
+      );
+    } catch (e) {}
+
     position._strangleAdjustedAt = Date.now();
     position.st_legs = legs;
     return;
@@ -344,6 +355,17 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       message: `CE ${ceLeg.strike} decayed to ${ceCurrent} (was ${ceEntry}). Closed. New CE ${newCEEntry.strike}@${newCEEntry.CE} matching PE ${peCurrent}`,
      time: new Date().toISOString(),
     });
+
+    try {
+      const legPnl = (ceEntry - ceExitPrice) * qty;
+      sendAlert(
+        `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
+        `Reason: CE decayed ${((1 - ceCurrent / ceEntry) * 100).toFixed(0)}% (${money(ceEntry)} → ${money(ceCurrent)})\n` +
+        `Booked CE ${ceLeg.strike} @ ${money(ceExitPrice)} (${signed(legPnl)})\n` +
+        `New CE ${newCEEntry.strike} @ ${money(newCEEntry.CE)} (matching PE LTP ${money(peCurrent)})\n` +
+        `Net P&L: ${signed(position.st_realizedPnl)}`,
+      );
+    } catch (e) {}
 
     position._strangleAdjustedAt = Date.now();
     position.st_legs = legs;

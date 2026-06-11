@@ -99,10 +99,9 @@ exports.getDailyPnL = async (req, res) => {
     const map = {};
 
     trades.forEach((t) => {
-      const date = new Date(t.exitTime).toLocaleDateString();
-
+      const d = new Date(t.exitTime);
+      const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       if (!map[date]) map[date] = 0;
-
       map[date] += t.netPnl || 0;
     });
 

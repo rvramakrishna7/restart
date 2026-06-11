@@ -360,6 +360,19 @@ const StrategySelection = () => {
   const ifPnl = pnlByType(["IRON_FLY"]);
   const stPnl = pnlByType(["INTRADAY_STRADDLE"]);
   const sgPnl = pnlByType(["INTRADAY_STRANGLE"]);
+  // per-strategy: does this strategy currently have any OPEN position?
+  const dsOpen =
+    positions.filter(
+      (p) =>
+        (p.strategyType === "DEBIT_SPREAD" || !p.strategyType) &&
+        p.status === "OPEN",
+    ).length > 0;
+  const ifOpen =
+    positions.filter((p) => p.strategyType === "IRON_FLY" && p.status === "OPEN").length > 0;
+  const stOpen =
+    positions.filter((p) => p.strategyType === "INTRADAY_STRADDLE" && p.status === "OPEN").length > 0;
+  const sgOpen =
+    positions.filter((p) => p.strategyType === "INTRADAY_STRANGLE" && p.status === "OPEN").length > 0;
 
   return (
     <>
@@ -375,7 +388,7 @@ const StrategySelection = () => {
           <div className="mobile-card-header" onClick={() => toggleCard("ds")}>
             <span className="mch-name">Debit Spread</span>
             <span className="mch-right">
-              {running && (
+               {dsOpen && (
                 <span className={`mch-pnl ${dsPnl >= 0 ? "profit" : "loss"}`}>
                   {dsPnl >= 0 ? "+" : ""}₹{Math.abs(dsPnl).toFixed(2)}
                 </span>
@@ -515,7 +528,7 @@ const StrategySelection = () => {
           <div className="mobile-card-header" onClick={() => toggleCard("if")}>
             <span className="mch-name">Iron Fly</span>
             <span className="mch-right">
-              {ifRunning && (
+              {ifOpen && (
                 <span className={`mch-pnl ${ifPnl >= 0 ? "profit" : "loss"}`}>
                   {ifPnl >= 0 ? "+" : ""}₹{Math.abs(ifPnl).toFixed(2)}
                 </span>
@@ -620,7 +633,7 @@ const StrategySelection = () => {
           <div className="mobile-card-header" onClick={() => toggleCard("st")}>
             <span className="mch-name">Straddle</span>
             <span className="mch-right">
-              {stRunning && (
+              {stOpen && (
                 <span className={`mch-pnl ${stPnl >= 0 ? "profit" : "loss"}`}>
                   {stPnl >= 0 ? "+" : ""}₹{Math.abs(stPnl).toFixed(2)}
                 </span>
@@ -715,7 +728,7 @@ const StrategySelection = () => {
           <div className="mobile-card-header" onClick={() => toggleCard("sg")}>
             <span className="mch-name">Strangle</span>
             <span className="mch-right">
-              {sgRunning && (
+              {sgOpen && (
                 <span className={`mch-pnl ${sgPnl >= 0 ? "profit" : "loss"}`}>
                   {sgPnl >= 0 ? "+" : ""}₹{Math.abs(sgPnl).toFixed(2)}
                 </span>

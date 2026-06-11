@@ -166,6 +166,7 @@ img, svg, canvas { max-width: 100%; }
   .chip { flex: 1 1 auto; text-align: center; }
   .execute-inline { margin-left: 0; width: 100%; }
   .execute-inline .primary-btn { width: 100%; }
+  .exec-mtm { display: none; }   /* mobile shows MTM in the card header instead */
   .lot-inline { width: 100%; justify-content: space-between; }
 
   /* ---- PREVIEW STRIP ---- */
