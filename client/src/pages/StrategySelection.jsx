@@ -347,16 +347,15 @@ const StrategySelection = () => {
 
   // per-strategy open PnL for mobile card headers
   const pnlByType = (types) =>
-    positions
-      .filter((p) => types.includes(p.strategyType) && p.status === "OPEN")
-      .reduce((a, p) => a + (p.pnl || 0), 0);
+  positions
+    .filter((p) => types.includes(p.strategyType))
+    .reduce((a, p) => a + Number(p.pnl || 0), 0);
   const dsPnl = positions
-    .filter(
-      (p) =>
-        (p.strategyType === "DEBIT_SPREAD" || !p.strategyType) &&
-        p.status === "OPEN",
-    )
-    .reduce((a, p) => a + (p.pnl || 0), 0);
+  .filter(
+    (p) =>
+      p.strategyType === "DEBIT_SPREAD" || !p.strategyType
+  )
+  .reduce((a, p) => a + Number(p.pnl || 0), 0);
   const ifPnl = pnlByType(["IRON_FLY"]);
   const stPnl = pnlByType(["INTRADAY_STRADDLE"]);
   const sgPnl = pnlByType(["INTRADAY_STRANGLE"]);
