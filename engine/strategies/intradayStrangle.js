@@ -89,8 +89,8 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
   const ceEntry = ceLeg.entryPremium;
   const peEntry = peLeg.entryPremium;
 
-  const RISE = 0.20; // TEST
-  const DECAY = 0.10; // TEST
+  const RISE = STRANGLE.RISE_TRIGGER_PCT;  
+  const DECAY = STRANGLE.DECAY_TRIGGER_PCT; 
 
   // ── minimum distance from current futures price ──
   const isBnf = position.index === "BANKNIFTY";

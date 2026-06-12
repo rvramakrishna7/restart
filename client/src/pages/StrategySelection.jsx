@@ -349,13 +349,13 @@ const StrategySelection = () => {
   const pnlByType = (types) =>
   positions
     .filter((p) => types.includes(p.strategyType))
-    .reduce((a, p) => a + Number(p.pnl || 0), 0);
+    .reduce((a, p) => a + (p.pnl || 0), 0);
   const dsPnl = positions
   .filter(
     (p) =>
       p.strategyType === "DEBIT_SPREAD" || !p.strategyType
   )
-  .reduce((a, p) => a + Number(p.pnl || 0), 0);
+  .reduce((a, p) => a + (p.pnl || 0), 0);
   const ifPnl = pnlByType(["IRON_FLY"]);
   const stPnl = pnlByType(["INTRADAY_STRADDLE"]);
   const sgPnl = pnlByType(["INTRADAY_STRANGLE"]);

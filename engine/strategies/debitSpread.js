@@ -156,8 +156,8 @@ function _checkDebitSpread(
   if (!position.lossAdjusted) {
     const currentBuyPremium = currentPremium;
 
-    // ===== TEST MODE =====
-    if (currentBuyPremium <= position.entryPremium * 0.9) {
+    
+    if (currentBuyPremium <= position.entryPremium * 0.5) {
       logger.log("⚠️ LOSS SIDE TRIGGERED (50%)");
 
       position.lossAdjusted = true;
@@ -360,9 +360,8 @@ function _checkDebitSpread(
             otm100,
           });
 
-          // LIVE: diff >= 65
-          if (diff >= 20 && position.shiftCount < 2) {
-            // TEST
+          
+          if (diff >= 65 && position.shiftCount < 2) {
             logger.log("🚀 100 SHIFT (NIFTY)", buyStrike, "→", otm100);
             const realizedNow =
               (currentBuyPremium -
@@ -439,9 +438,8 @@ function _checkDebitSpread(
               otm50,
             });
 
-            // LIVE: diff >= 35
-            if (diff >= 10 && position.shiftCount < 4) {
-              // TEST
+          
+            if (diff >= 35 && position.shiftCount < 4) {
               logger.log("🚀 50 SHIFT (NIFTY)", buyStrike, "→", otm50);
               const realizedNow =
                 (currentBuyPremium -
@@ -519,9 +517,8 @@ function _checkDebitSpread(
             otm100,
           });
 
-          // LIVE: diff >= 65
-          if (diff >= 20 && position.shiftCount < 2) {
-            // TEST
+          
+          if (diff >= 65 && position.shiftCount < 2) {
             logger.log("🚀 100 SHIFT (BANKNIFTY)", buyStrike, "→", otm100);
             const realizedNow =
               (currentBuyPremium -
