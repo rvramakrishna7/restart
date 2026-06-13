@@ -504,10 +504,10 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                 positions={positions}
               />
             )}
-            {events.length > 0 && (
+            {events.filter((e) => e.strategyType === strategyType).length > 0 && (
               <div className="activity-feed">
                 <div className="activity-title">Activity</div>
-                {events.slice(0, 8).map((e, i) => (
+                {events.filter((e) => e.strategyType === strategyType).slice(0, 8).map((e, i) => (
                   <div key={i} className="activity-row">
                     <span className="activity-time">{formatTime(e.time)}</span>
                     <span className="activity-msg">

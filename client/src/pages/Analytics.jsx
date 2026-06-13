@@ -214,9 +214,10 @@ export default function Analytics() {
   
   const formatSymbol = (sym) => {
     if (!sym) return "";
-   
-    const m = sym.match(/^(NIFTY|BANKNIFTY)(\d{5,6})(CE|PE)$/i);
-    if (m) return `${m[1]} ${m[2].slice(-5)} ${m[3]}`;
+    const monthly = sym.match(/^([A-Z]+)(\d{2})([A-Z]{3})(\d+)(CE|PE)$/);
+    if (monthly) return `${monthly[1]} ${monthly[4]} ${monthly[5]}`;
+    const weekly = sym.match(/^([A-Z]+)(\d{2})(\d)(\d{2})(\d+)(CE|PE)$/);
+    if (weekly) return `${weekly[1]} ${weekly[5]} ${weekly[6]}`;
     return sym;
   };
 
@@ -549,7 +550,7 @@ export default function Analytics() {
                                             {l.type}
                                           </span>
                                         </td>
-                                        <td data-label="Symbol">{l.symbol}</td>
+                                        <td data-label="Symbol">{formatSymbol(l.symbol)}</td>
                                         <td data-label="Qty">{qty}</td>
                                         <td data-label="Entry">₹ {entry.toFixed(2)}</td>
                                         <td data-label="Entry Value">₹ {inr(qty * entry)}</td>
