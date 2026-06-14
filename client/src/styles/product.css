@@ -42,7 +42,6 @@
 }
 .rp-page p {
   margin: 0;
-  
 }
 
 /* ===== NAV ===== */
@@ -368,6 +367,10 @@
 @media (min-width: 861px) {
   .rp-hero-sub {
     white-space: pre-line;
+    max-width: 900px;
+  }
+  .rp-platform {
+    white-space: nowrap;
     max-width: 900px;
   }
 }
@@ -1256,5 +1259,3 @@
     flex: 1 1 100%;
   }
 }
-
-
