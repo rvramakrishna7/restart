@@ -369,10 +369,6 @@
     white-space: pre-line;
     max-width: 900px;
   }
-  .rp-platform {
-    white-space: nowrap;
-    max-width: 900px;
-  }
 }
 .rp-hero-actions {
   display: flex;

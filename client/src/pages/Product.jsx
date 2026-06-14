@@ -373,7 +373,7 @@ const Product = () => {
       <section className="rp-features" id="features">
         <div className="rp-section-head rp-reveal">
           <span className="rp-eyebrow">The platform</span>
-          <h2 className="rp-platform">Built for traders who value discipline.</h2>
+          <h2 className="rp-platform">Built for traders who value Discipline.</h2>
         </div>
 
         <div className="rp-frow">
