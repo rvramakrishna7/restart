@@ -3,27 +3,54 @@
    Breakpoints: 1024 (tablet) · 768 (mobile) · 480 (small phone)
    ===================================================================== */
 
-html { overflow-x: hidden; }
-body { max-width: 100%; overflow-x: clip; }
-img, svg, canvas { max-width: 100%; }
+html {
+  overflow-x: hidden;
+}
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+img,
+svg,
+canvas {
+  max-width: 100%;
+}
 
 /* mobile-only collapsible strategy card header — hidden on desktop */
-.mobile-card-header { display: none; }
+.mobile-card-header {
+  display: none;
+}
 
 /* ===================== TABLET ≤ 1024px ===================== */
 @media (max-width: 1024px) {
-  .main { padding: 20px 18px; }
-  .navbar { padding: 0 16px; }
-  .nav-left { gap: 16px; }
-  .nav-right { gap: 10px; }
-  .strategy-name { min-width: 120px; }
-  .payoff-metrics { gap: 12px; }
+  .main {
+    padding: 20px 18px;
+  }
+  .navbar {
+    padding: 0 16px;
+  }
+  .nav-left {
+    gap: 16px;
+  }
+  .nav-right {
+    gap: 10px;
+  }
+  .strategy-name {
+    min-width: 120px;
+  }
+  .payoff-metrics {
+    gap: 12px;
+  }
 }
 
 /* ===================== MOBILE ≤ 768px ===================== */
 @media (max-width: 768px) {
-  .main { padding: 16px 12px; }
-  .main h2 { font-size: 19px; }
+  .main {
+    padding: 16px 12px;
+  }
+  .main h2 {
+    font-size: 19px;
+  }
 
   /* =========================================================
      NAVBAR — Option A
@@ -46,7 +73,9 @@ img, svg, canvas { max-width: 100%; }
   }
 
   .nav-left,
-  .nav-right { display: contents; }
+  .nav-right {
+    display: contents;
+  }
 
   /* Row 1 LEFT: logo — fixed, compact, never shrinks below its text */
   .logo {
@@ -56,14 +85,17 @@ img, svg, canvas { max-width: 100%; }
     white-space: nowrap;
     letter-spacing: -0.4px;
   }
-  .logo::before { width: 20px; height: 20px; }   /* smaller logo square */
+  .logo::before {
+    width: 20px;
+    height: 20px;
+  } /* smaller logo square */
 
   /* Row 1 MIDDLE: broker box — compact, fixed-ish, sits between logo & logout.
      Label is now short ("Broker: Live" / "Broker: Off") so it always fits. */
   .broker-box {
     order: 2;
     flex: 0 0 auto;
-    margin-left: auto;       /* pushes broker+logout group to the right */
+    margin-left: auto; /* pushes broker+logout group to the right */
     padding: 4px 7px;
     gap: 5px;
   }
@@ -71,9 +103,18 @@ img, svg, canvas { max-width: 100%; }
     font-size: 10.5px;
     white-space: nowrap;
   }
-  .toggle { flex-shrink: 0; width: 32px; height: 18px; }
-  .toggle .circle { width: 14px; height: 14px; }
-  .toggle.on .circle { left: 16px; }
+  .toggle {
+    flex-shrink: 0;
+    width: 32px;
+    height: 18px;
+  }
+  .toggle .circle {
+    width: 14px;
+    height: 14px;
+  }
+  .toggle.on .circle {
+    left: 16px;
+  }
 
   /* Row 1 RIGHT: logout — fixed, compact, never shrinks, never wraps */
   .nav-right > .primary-btn {
@@ -86,7 +127,9 @@ img, svg, canvas { max-width: 100%; }
   }
 
   /* hide the clock entirely on mobile (it stole a whole row) */
-  .nav-right > span { display: none; }
+  .nav-right > span {
+    display: none;
+  }
 
   /* Row 2: market box — full width, own line (ABOVE the nav links) */
   .market-box {
@@ -97,9 +140,13 @@ img, svg, canvas { max-width: 100%; }
     justify-content: flex-start;
     align-items: center;
   }
-  .market-item { border-left: none !important; }
+  .market-item {
+    border-left: none !important;
+  }
   /* push the OPEN/CLOSED status pill to the far right */
-  .market-status { margin-left: auto; }
+  .market-status {
+    margin-left: auto;
+  }
 
   /* Row 3: nav links — full width, 3 links spread across, slightly bigger */
   .nav-links {
@@ -107,11 +154,15 @@ img, svg, canvas { max-width: 100%; }
     flex: 0 0 100%;
     display: flex;
     flex-wrap: nowrap;
-    justify-content: space-between;   /* 3 links span entire row */
+    justify-content: space-between; /* 3 links span entire row */
     gap: 4px;
     height: auto;
   }
-  .nav-links span { padding: 7px 12px; font-size: 14.5px; flex: 0 1 auto; }
+  .nav-links span {
+    padding: 7px 12px;
+    font-size: 14.5px;
+    flex: 0 1 auto;
+  }
 
   /* ---- DASHBOARD HEADER — subtle, stacked, polished ---- */
   .dash-header {
@@ -120,8 +171,13 @@ img, svg, canvas { max-width: 100%; }
     gap: 14px;
     margin-bottom: 18px;
   }
-  .dash-header-left h2 { font-size: 20px; }
-  .dash-header-left p { font-size: 12.5px; color: #94a3b8; }
+  .dash-header-left h2 {
+    font-size: 20px;
+  }
+  .dash-header-left p {
+    font-size: 12.5px;
+    color: #94a3b8;
+  }
   /* segmented Paper/Live toggle — cleaner, full-width split */
   .dash-mode-toggle {
     width: 100%;
@@ -137,8 +193,15 @@ img, svg, canvas { max-width: 100%; }
   }
 
   /* ---- STRATEGY ROW ---- */
-  .strategy-row { gap: 10px; padding: 14px; align-items: stretch; }
-  .strategy-name { min-width: 0; width: 100%; }
+  .strategy-row {
+    gap: 10px;
+    padding: 14px;
+    align-items: stretch;
+  }
+  .strategy-name {
+    min-width: 0;
+    width: 100%;
+  }
   /* ===== MOBILE COLLAPSIBLE STRATEGY CARDS ===== */
   .mobile-card-header {
     display: flex;
@@ -147,31 +210,76 @@ img, svg, canvas { max-width: 100%; }
     width: 100%;
     cursor: pointer;
   }
-  .mch-name { font-size: 16px; font-weight: 700; color: #0f172a; }
-  .mch-right { display: flex; align-items: center; gap: 10px; }
-  .mch-pnl { font-size: 14px; font-weight: 700; }
-  .mch-chevron { display: inline-flex; color: #475569; transition: transform 0.2s ease; }
-  .mch-chevron.open { transform: rotate(180deg); }
+  .mch-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .mch-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mch-pnl {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .mch-chevron {
+    display: inline-flex;
+    color: #475569;
+    transition: transform 0.2s ease;
+  }
+  .mch-chevron.open {
+    transform: rotate(180deg);
+  }
 
   /* original inline name hidden on mobile (the header shows it) */
-  .strategy-row > .strategy-name { display: none; }
+  .strategy-row > .strategy-name {
+    display: none;
+  }
 
   /* collapsed card: show only the header */
-  .strategy-row.collapsed > *:not(.mobile-card-header) { display: none; }
+  .strategy-row.collapsed > *:not(.mobile-card-header) {
+    display: none;
+  }
   /* collapsed card: also hide the preview / no-trade strip that follows it */
   .strategy-row.collapsed + .preview-row,
-  .strategy-row.collapsed + .no-trade { display: none; }
+  .strategy-row.collapsed + .no-trade {
+    display: none;
+  }
 
-  .instrument-switch, .expiry-switch { width: 100%; }
-  .chip { flex: 1 1 auto; text-align: center; }
-  .execute-inline { margin-left: 0; width: 100%; }
-  .execute-inline .primary-btn { width: 100%; }
-  .exec-mtm { display: none; }   /* mobile shows MTM in the card header instead */
-  .lot-inline { width: 100%; justify-content: space-between; }
+  .instrument-switch,
+  .expiry-switch {
+    width: 100%;
+  }
+  .chip {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  .execute-inline {
+    margin-left: 0;
+    width: 100%;
+  }
+  .execute-inline .primary-btn {
+    width: 100%;
+  }
+  .exec-mtm {
+    display: none;
+  } /* mobile shows MTM in the card header instead */
+  .lot-inline {
+    width: 100%;
+    justify-content: space-between;
+  }
 
   /* ---- PREVIEW STRIP ---- */
-  .preview-row.enhanced { gap: 8px; padding: 10px 12px; }
-  .preview-row.enhanced > span { padding: 5px 10px; font-size: 12px; }
+  .preview-row.enhanced {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .preview-row.enhanced > span {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
 
   /* =========================================================
      POSITION TABLE → ZERODHA-STYLE 3-LINE CARD
@@ -180,13 +288,22 @@ img, svg, canvas { max-width: 100%; }
      Line 3: Entry → LTP                  ↔  time / status (right)
      Built purely from the existing <td>s via grid placement.
      ========================================================= */
-  .execution-table { overflow: visible; background: transparent; border: none; }
+  .execution-table {
+    overflow: visible;
+    background: transparent;
+    border: none;
+  }
 
   .position-table,
   .position-table tbody,
   .position-table tr,
-  .position-table td { display: block; width: 100%; }
-  .position-table thead { display: none; }
+  .position-table td {
+    display: block;
+    width: 100%;
+  }
+  .position-table thead {
+    display: none;
+  }
 
   /* each row = a card — 3 columns: [left] [middle/flex] [right] */
   .position-table tr {
@@ -196,9 +313,9 @@ img, svg, canvas { max-width: 100%; }
     border-radius: 12px;
     padding: 12px 14px;
     margin-bottom: 10px;
-    box-shadow: 0 1px 3px rgba(15,23,42,0.05);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
     display: grid;
-    grid-template-columns: auto 1fr auto;   /* badge | spacer | pnl */
+    grid-template-columns: auto 1fr auto; /* badge | spacer | pnl */
     grid-column-gap: 8px;
     grid-row-gap: 5px;
     align-items: center;
@@ -224,30 +341,48 @@ img, svg, canvas { max-width: 100%; }
 
   /* ---- LINE 1 : [Trade badge] .......... [P&L] ---- */
   .position-table td[data-label="Trade"] {
-    grid-column: 1; grid-row: 1;
+    grid-column: 1;
+    grid-row: 1;
   }
-  .position-table td[data-label="Trade"]::before { content: ""; margin: 0; }
+  .position-table td[data-label="Trade"]::before {
+    content: "";
+    margin: 0;
+  }
 
   .position-table td[data-label="P&L"] {
-    grid-column: 3; grid-row: 1;
-    text-align: right; font-weight: 700; font-size: 15px;
+    grid-column: 3;
+    grid-row: 1;
+    text-align: right;
+    font-weight: 700;
+    font-size: 15px;
     white-space: nowrap;
   }
-  .position-table td[data-label="P&L"]::before { content: ""; margin: 0; }
+  .position-table td[data-label="P&L"]::before {
+    content: "";
+    margin: 0;
+  }
 
   /* ---- LINE 2 : Strike name on its OWN full-width line ---- */
   .position-table td[data-label="Ticker"] {
-    grid-column: 1 / 4; grid-row: 2;
-    font-weight: 700; color: #0f172a; font-size: 14px;
-    white-space: normal; overflow: visible; line-height: 1.3;
+    grid-column: 1 / 4;
+    grid-row: 2;
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 14px;
+    white-space: normal;
+    overflow: visible;
+    line-height: 1.3;
     margin-bottom: 2px;
-    padding-left: 0 !important;   /* flush-left under the BUY badge */
+    padding-left: 0 !important; /* flush-left under the BUY badge */
   }
-  .position-table td[data-label="Ticker"]::before { content: ""; margin: 0; }
+  .position-table td[data-label="Ticker"]::before {
+    content: "";
+    margin: 0;
+  }
   .position-table td[data-label="Ticker"] > span {
     display: inline-flex;
     align-items: center;
-    justify-content: flex-start;   /* start at left edge */
+    justify-content: flex-start; /* start at left edge */
     flex-wrap: nowrap;
     white-space: normal;
     gap: 6px;
@@ -255,57 +390,92 @@ img, svg, canvas { max-width: 100%; }
 
   /* ---- LINE 3 : Entry ↔ LTP ---- */
   .position-table td[data-label="Entry"] {
-    grid-column: 1 / 3; grid-row: 3;
-    color: #64748b; font-size: 12px;
+    grid-column: 1 / 3;
+    grid-row: 3;
+    color: #64748b;
+    font-size: 12px;
   }
   .position-table td[data-label="LTP"] {
-    grid-column: 3; grid-row: 3;
-    text-align: right; color: #64748b; font-size: 12px;
+    grid-column: 3;
+    grid-row: 3;
+    text-align: right;
+    color: #64748b;
+    font-size: 12px;
   }
 
   /* ---- LINE 4 : Qty ↔ Lots ---- */
   .position-table td[data-label="Qty"] {
-    grid-column: 1 / 3; grid-row: 4;
-    color: #64748b; font-size: 12px;
+    grid-column: 1 / 3;
+    grid-row: 4;
+    color: #64748b;
+    font-size: 12px;
   }
   .position-table td[data-label="Lots"] {
-    grid-column: 3; grid-row: 4;
-    text-align: right; color: #64748b; font-size: 12px;
+    grid-column: 3;
+    grid-row: 4;
+    text-align: right;
+    color: #64748b;
+    font-size: 12px;
   }
 
   /* ---- LINE 5 : Entered ↔ Exited ---- */
   .position-table td[data-label="Entered"] {
-    grid-column: 1 / 3; grid-row: 5;
-    color: #94a3b8; font-size: 11.5px;
+    grid-column: 1 / 3;
+    grid-row: 5;
+    color: #94a3b8;
+    font-size: 11.5px;
   }
   .position-table td[data-label="Exited"] {
-    grid-column: 3; grid-row: 5;
-    text-align: right; color: #94a3b8; font-size: 11.5px;
+    grid-column: 3;
+    grid-row: 5;
+    text-align: right;
+    color: #94a3b8;
+    font-size: 11.5px;
   }
 
   /* ---- LINE 6 : [Status] [Points] [Exit button] ---- */
   .position-table td[data-label="Status"] {
-    grid-column: 1; grid-row: 6;
-    margin-top: 4px; white-space: nowrap;
+    grid-column: 1;
+    grid-row: 6;
+    margin-top: 4px;
+    white-space: nowrap;
   }
-  .position-table td[data-label="Status"]::before { content: ""; margin: 0; }
+  .position-table td[data-label="Status"]::before {
+    content: "";
+    margin: 0;
+  }
 
   .position-table td[data-label="Points"] {
-    grid-column: 2; grid-row: 6;
-    text-align: right; font-weight: 700; margin-top: 4px;
+    grid-column: 2;
+    grid-row: 6;
+    text-align: right;
+    font-weight: 700;
+    margin-top: 4px;
     padding-right: 8px;
   }
   .position-table td[data-label="Points"]::before {
-    content: "Pts "; color: #94a3b8; font-weight: 600; font-size: 11px;
+    content: "Pts ";
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 11px;
   }
 
   .position-table td[data-label="Action"] {
-    grid-column: 3; grid-row: 6;
-    text-align: right; margin-top: 4px;
+    grid-column: 3;
+    grid-row: 6;
+    text-align: right;
+    margin-top: 4px;
   }
-  .position-table td[data-label="Action"]::before { content: ""; margin: 0; }
-  .position-table td[data-label="Action"]:empty { display: none; }
-  .position-table .exit-btn { padding: 6px 18px; }
+  .position-table td[data-label="Action"]::before {
+    content: "";
+    margin: 0;
+  }
+  .position-table td[data-label="Action"]:empty {
+    display: none;
+  }
+  .position-table .exit-btn {
+    padding: 6px 18px;
+  }
 
   /* TOTAL row → simple summary card */
   .position-table tr.total-row {
@@ -314,30 +484,69 @@ img, svg, canvas { max-width: 100%; }
     border: 1px solid #e2e8f0;
   }
   .position-table tr.total-row td[data-label=""] {
-    grid-column: 1; grid-row: 1;
-    font-weight: 700; color: #0f172a; padding-left: 0 !important;
+    grid-column: 1;
+    grid-row: 1;
+    font-weight: 700;
+    color: #0f172a;
+    padding-left: 0 !important;
   }
-  .position-table tr.total-row td[data-label=""]::before { content: ""; margin: 0; }
+  .position-table tr.total-row td[data-label=""]::before {
+    content: "";
+    margin: 0;
+  }
   .position-table tr.total-row td[data-label="Total Points"] {
-    grid-column: 2; grid-row: 1; text-align: right; font-weight: 700;
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+    font-weight: 700;
   }
-  .position-table tr.total-row td[data-label="Total Points"]::before { content: ""; margin: 0; }
-  .position-table tr.total-row td[colspan] { display: none; }
+  .position-table tr.total-row td[data-label="Total Points"]::before {
+    content: "";
+    margin: 0;
+  }
+  .position-table tr.total-row td[colspan] {
+    display: none;
+  }
 
   /* ---- EXECUTION ACTIONS ---- */
   .execution-actions {
-    flex-direction: column; align-items: stretch; gap: 10px;
-    background: white; border-radius: 12px; padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
   }
-  .right-actions { margin-left: 0; width: 100%; justify-content: space-between; }
-  .strategy-summary { font-size: 13px; }
-  .spread-total-pnl { font-size: 16px; padding: 7px 12px; }
-  .exit-all-btn { flex: 1; text-align: center; }
+  .right-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .strategy-summary {
+    font-size: 13px;
+  }
+  .spread-total-pnl {
+    font-size: 16px;
+    padding: 7px 12px;
+  }
+  .exit-all-btn {
+    flex: 1;
+    text-align: center;
+  }
 
   /* ---- PAYOFF ---- */
-  .payoff-wrapper { padding: 16px 12px; width: 100%; overflow: hidden; }
-  .payoff-top { gap: 10px; }
-  .payoff-metrics { gap: 10px; font-size: 11.5px; }
+  .payoff-wrapper {
+    padding: 16px 12px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .payoff-top {
+    gap: 10px;
+  }
+  .payoff-metrics {
+    gap: 10px;
+    font-size: 11.5px;
+  }
 
   /* ---- ANALYTICS TRADE HISTORY — card layout on mobile ---- */
   .analytics-table-wrap {
@@ -346,12 +555,18 @@ img, svg, canvas { max-width: 100%; }
     overflow-x: visible;
   }
 
-  .analytics-table-wrap .table thead { display: none; }
+  .analytics-table-wrap .table thead {
+    display: none;
+  }
 
   .analytics-table-wrap .table,
   .analytics-table-wrap .table tbody,
   .analytics-table-wrap .table tr,
-  .analytics-table-wrap .table td { display: block; width: 100%; box-sizing: border-box; }
+  .analytics-table-wrap .table td {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
   .analytics-table-wrap .table tr {
     background: white;
@@ -368,15 +583,21 @@ img, svg, canvas { max-width: 100%; }
 
   /* Date — top left */
   .analytics-table-wrap .table td:nth-child(1) {
-    grid-column: 1; grid-row: 1;
-    font-size: 11px; color: #94a3b8; font-weight: 600;
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
     padding: 0;
   }
 
   /* Strategy — bottom left, bold */
   .analytics-table-wrap .table td:nth-child(2) {
-    grid-column: 1; grid-row: 2;
-    font-size: 13px; font-weight: 700; color: #0f172a;
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
     padding: 0;
   }
 
@@ -387,16 +608,22 @@ img, svg, canvas { max-width: 100%; }
 
   /* PnL — top right, large */
   .analytics-table-wrap .table td:nth-child(4) {
-    grid-column: 2; grid-row: 1;
-    text-align: right; font-size: 14px; font-weight: 700;
+    grid-column: 2;
+    grid-row: 1;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 700;
     padding: 0;
   }
 
   /* Caret — bottom right */
   .analytics-table-wrap .table td:nth-child(5) {
-    grid-column: 2; grid-row: 2;
-    text-align: right; padding: 0;
-    width: auto; min-width: auto;
+    grid-column: 2;
+    grid-row: 2;
+    text-align: right;
+    padding: 0;
+    width: auto;
+    min-width: auto;
   }
 
   /* Detail expand row — full width */
@@ -417,87 +644,237 @@ img, svg, canvas { max-width: 100%; }
 
 /* ===================== SMALL PHONE ≤ 480px ===================== */
 @media (max-width: 480px) {
-  .main { padding: 12px 10px; }
-  .main h2 { font-size: 17px; }
-
-  .navbar { padding: 9px 10px; }
-  .logo { font-size: 15px; }
-  .nav-links span { padding: 5px 8px; font-size: 12px; }
-  .broker-box span { font-size: 11px; }
-
-  .market-item { font-size: 11.5px; padding: 3px 6px; }
-  .market-item small { display: none; }
-
-  .category-title { margin-top: 20px; }
-  .chip { font-size: 12px; padding: 6px 10px; }
-
-  .preview-row.enhanced > span { font-size: 11.5px; padding: 5px 8px; }
-
-  .spread-total-pnl { font-size: 15px; }
-  .mtm-label { font-size: 10px; }
-  .mode-toggle-wrapper { height: 30px; }
-  .mode-label { padding: 3px 8px; font-size: 11.5px; }
-}
-
-/* ---- TRADE DETAIL TABLE → card per leg on mobile ---- */
-@media (max-width: 768px) {
-  .trade-detail-table { min-width: 0; width: 100%; }
-  .trade-detail-table thead { display: none; }
-  .trade-detail-table { display: block; }
-  .trade-detail-table tbody { display: block; }
-
-  .trade-detail-table tr {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto auto auto auto auto;
-    background: #f8fafc;
-    border: 1px solid #eef2f7;
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    column-gap: 12px;
-    row-gap: 3px;
+  .main {
+    padding: 12px 10px;
+  }
+  .main h2 {
+    font-size: 17px;
   }
 
-  /* All left-column tds */
-  .trade-detail-table td {
-    display: block;
-    grid-column: 1;
-    border: none;
-    padding: 0;
+  .navbar {
+    padding: 9px 10px;
+  }
+  .logo {
+    font-size: 15px;
+  }
+  .nav-links span {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+  .broker-box span {
     font-size: 11px;
-    color: #64748b;
-    white-space: normal;
+  }
+
+  .market-item {
+    font-size: 11.5px;
+    padding: 3px 6px;
+  }
+  .market-item small {
+    display: none;
+  }
+
+  .category-title {
+    margin-top: 20px;
+  }
+  .chip {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .preview-row.enhanced > span {
+    font-size: 11.5px;
+    padding: 5px 8px;
+  }
+
+  .spread-total-pnl {
+    font-size: 15px;
+  }
+  .mtm-label {
+    font-size: 10px;
+  }
+  .mode-toggle-wrapper {
+    height: 30px;
+  }
+  .mode-label {
+    padding: 3px 8px;
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics-table-wrap .table .trade-detail-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .analytics-table-wrap .table .trade-detail-table thead {
+    display: none;
+  }
+  .analytics-table-wrap .table .trade-detail-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .analytics-table-wrap .table .trade-detail-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "type     pnl"
+      "symbol   symbol"
+      "entry    exit"
+      "entryval exitval";
+    column-gap: 12px;
+    row-gap: 6px;
+    position: relative;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    width: 100%;
     box-sizing: border-box;
   }
 
-  .trade-detail-table td[data-label="Type"]        { grid-column: 1; grid-row: 1; padding-bottom: 3px; }
-  .trade-detail-table td[data-label="Symbol"]      { grid-column: 1; grid-row: 2; font-size: 12.5px; font-weight: 700; color: #0f172a; padding-bottom: 4px; word-break: break-all; white-space: normal; }
-  .trade-detail-table td[data-label="Qty"]         { grid-column: 1; grid-row: 3; }
-  .trade-detail-table td[data-label="Entry"]       { grid-column: 1; grid-row: 4; }
-  .trade-detail-table td[data-label="Entry Value"] { grid-column: 1; grid-row: 5; }
-  .trade-detail-table td[data-label="Exit"]        { grid-column: 1; grid-row: 6; }
-  .trade-detail-table td[data-label="Exit Value"]  { grid-column: 1; grid-row: 7; }
-
-  .trade-detail-table td[data-label="Qty"]::before         { content: "Qty: ";       font-weight: 700; color: #94a3b8; font-size: 10.5px; }
-  .trade-detail-table td[data-label="Entry"]::before       { content: "Entry: ";     font-weight: 700; color: #94a3b8; font-size: 10.5px; }
-  .trade-detail-table td[data-label="Entry Value"]::before { content: "Entry Val: "; font-weight: 700; color: #94a3b8; font-size: 10.5px; }
-  .trade-detail-table td[data-label="Exit"]::before        { content: "Exit: ";      font-weight: 700; color: #94a3b8; font-size: 10.5px; }
-  .trade-detail-table td[data-label="Exit Value"]::before  { content: "Exit Val: ";  font-weight: 700; color: #94a3b8; font-size: 10.5px; }
-
-  /* P&L — right column, spans all rows, vertically centered */
-  .trade-detail-table td[data-label="Realised P&L"] {
-    grid-column: 2;
-    grid-row: 1 / 8;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    text-align: right;
-    font-size: 13px;
-    font-weight: 800;
-    white-space: nowrap;
-    padding: 0;
-    color: inherit;
+  .analytics-table-wrap .table .trade-detail-table tbody tr:last-child {
+    margin-bottom: 0;
   }
-  .trade-detail-table td[data-label="Realised P&L"]::before { display: none; }
+
+  .analytics-table-wrap .table .trade-detail-table td {
+    display: block;
+    border: none;
+    padding: 0;
+    white-space: normal;
+    width: auto;
+  }
+
+  /* Row 1: SELL/BUY badge (left) + PnL (right) */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Type"] {
+    grid-area: type;
+    align-self: center;
+  }
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Type"]
+    .leg-badge {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Realised P&L"] {
+    grid-area: pnl;
+    align-self: center;
+    text-align: right;
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  /* Row 2: Symbol, full width */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Symbol"] {
+    grid-area: symbol;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  /* Row 3: Entry / Exit */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Entry"] {
+    grid-area: entry;
+    font-size: 12.5px;
+    color: #475569;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Exit"] {
+    grid-area: exit;
+    text-align: right;
+    font-size: 12.5px;
+    color: #475569;
+  }
+
+  /* Row 4: Entry Value / Exit Value */
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Entry Value"] {
+    grid-area: entryval;
+    font-size: 12.5px;
+    color: #94a3b8;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Exit Value"] {
+    grid-area: exitval;
+    text-align: right;
+    font-size: 12.5px;
+    color: #94a3b8;
+  }
+
+  /* Labels */
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Entry"]::before {
+    content: "Entry: ";
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Exit"]::before {
+    content: "Exit: ";
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Entry Value"]::before {
+    content: "Entry Val: ";
+    font-weight: 700;
+    color: #94a3b8;
+  }
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Exit Value"]::before {
+    content: "Exit Val: ";
+    font-weight: 700;
+    color: #94a3b8;
+  }
+
+  /* Hide Qty */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Qty"] {
+    display: none;
+  }
+
+  .analytics-table-wrap .trade-detail {
+    padding: 8px 4px 4px;
+    overflow-x: visible;
+  }
+  /* Fix: Entry was being center-aligned by an external rule */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Entry"] {
+    text-align: left !important;
+  }
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Entry Value"] {
+    text-align: left !important;
+  }
+
+  /* Fix: PnL color was being overridden by .trade-detail-table td color rule */
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Realised P&L"].profit {
+    color: #16a34a !important;
+  }
+  .analytics-table-wrap
+    .table
+    .trade-detail-table
+    td[data-label="Realised P&L"].loss {
+    color: #dc2626 !important;
+  }
 }

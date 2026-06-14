@@ -201,7 +201,10 @@ export default function Analytics() {
         const [yy, mm, dd] = first.key.split("-").map(Number);
         const dt = new Date(yy, mm - 1, dd);
         if (dt.getMonth() !== lastMonth) {
-          months.push({ wi, label: dt.toLocaleString("en-US", { month: "short" }) });
+          months.push({
+            wi,
+            label: dt.toLocaleString("en-US", { month: "short" }),
+          });
           lastMonth = dt.getMonth();
         }
       }
@@ -211,7 +214,7 @@ export default function Analytics() {
   };
 
   const heatmap = buildHeatmap();
-  
+
   const formatSymbol = (sym) => {
     if (!sym) return "";
     const monthly = sym.match(/^([A-Z]+)(\d{2})([A-Z]{3})(\d+)(CE|PE)$/);
@@ -223,8 +226,6 @@ export default function Analytics() {
 
   const streak = getStreakStats();
 
-
-
   // Merge the always-on list with any real strategies found in data (no dupes).
   const strategyOptions = [...new Set([...KNOWN_STRATEGIES, ...allStrategies])];
 
@@ -233,10 +234,17 @@ export default function Analytics() {
       <Navbar />
 
       <div className="main">
-        <h2 className="page-title">Analytics Dashboard</h2>
+        <div className="title-row">
+          <h2 className="page-title">Analytics Dashboard</h2>
+          <ModeToggle mode={mode} setMode={setMode} />
+        </div>
 
         {/* FILTERS */}
         <div className="analytics-filters">
+          <div className="filters-label">
+            <span className="filters-label-icon">⏱</span>
+            Analyse your strategies
+          </div>
           <div className="date-group">
             <label>From</label>
             <input
@@ -270,8 +278,6 @@ export default function Analytics() {
             </select>
           </div>
 
-          <ModeToggle mode={mode} setMode={setMode} />
-
           <button
             className="primary-btn apply-btn"
             onClick={() => {
@@ -296,290 +302,318 @@ export default function Analytics() {
           </div>
         ) : (
           <>
-        
+            {/* KPI */}
+            <div className="analytics-kpi-row">
+              <Card title="Total PnL" value={summary.totalPnl} money />
+              <Card title="Trades" value={summary.totalTrades} />
+              <Card
+                title="Win Rate"
+                value={summary.winRate ? summary.winRate + "%" : "0%"}
+              />
+              <Card title="Max Win" value={summary.maxWin} money />
+              <Card title="Max Loss" value={summary.maxLoss} money />
+              <Card title="Risk Consistency" value={getRiskConsistency()} />
+            </div>
 
-        {/* KPI */}
-        <div className="analytics-kpi-row">
-          <Card title="Total PnL" value={summary.totalPnl} money />
-          <Card title="Trades" value={summary.totalTrades} />
-          <Card
-            title="Win Rate"
-            value={summary.winRate ? summary.winRate + "%" : "0%"}
-          />
-          <Card title="Max Win" value={summary.maxWin} money />
-          <Card title="Max Loss" value={summary.maxLoss} money />
-          <Card title="Risk Consistency" value={getRiskConsistency()} />
-        </div>
+            {/* STREAK */}
+            <div className="analytics-kpi-row">
+              <Card title="Max Win Streak" value={streak.maxWin} />
+              <Card title="Max Loss Streak" value={streak.maxLoss} />
+            </div>
 
-        {/* STREAK */}
-        <div className="analytics-kpi-row">
-          <Card title="Max Win Streak" value={streak.maxWin} />
-          <Card title="Max Loss Streak" value={streak.maxLoss} />
-        </div>
+            {/* CHARTS */}
+            <div className="section-block">
+              <h3 className="section-title">
+                Performance Overview
+                {strategy !== "all" && (
+                  <span className="section-title-right">
+                    {prettyStrategy(strategy)}
+                  </span>
+                )}
+              </h3>
 
-        {/* CHARTS */}
-        <div className="section-block">
-          <h3 className="section-title">
-            Performance Overview
-            {strategy !== "all" && (
-              <span className="section-title-right">
-                {prettyStrategy(strategy)}
-              </span>
-            )}
-          </h3>
-
-          <div className="chart-grid">
-            <ChartCard title="Equity Curve">
-              {dailyPnl.length === 0 ? (
-                <Empty />
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={cumulativeData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v) => `₹ ${v}`} />
-                    <Line
-                      dataKey="cumulative"
-                      stroke={lastPoint?.cumulative >= 0 ? "#16a34a" : "#dc2626"}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </ChartCard>
-
-            <ChartCard title="Drawdown">
-              {dailyPnl.length === 0 ? (
-                <Empty />
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={getDrawdownData()}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v) => `₹ ${v}`} />
-                    <Line dataKey="drawdown" stroke="#dc2626" dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </ChartCard>
-          </div>
-        </div>
-
-        {/* SECOND ROW */}
-        <div className="section-block">
-          <h3 className="section-title">Distribution &amp; Strategy</h3>
-
-          <div className="chart-grid">
-            <ChartCard title="Daily PnL">
-              {dailyPnl.length === 0 ? (
-                <Empty />
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={dailyPnl}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Bar dataKey="pnl" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </ChartCard>
-
-            <ChartCard title="Strategy Performance">
-              {Object.keys(strategyData).length === 0 ? (
-                <Empty />
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={getStrategyChartData()}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
-                    <XAxis dataKey="strategy" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Bar dataKey="pnl" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </ChartCard>
-          </div>
-        </div>
-
-        {/* HEATMAP */}
-        <div className="section-block">
-          <h3 className="section-title">
-            Performance Heatmap
-            {fromDate && toDate && (
-              <span className="section-title-right">
-                {fromDate} to {toDate}
-              </span>
-            )}
-          </h3>
-          {heatmap.weeks.length === 0 ? (
-            <Empty />
-          ) : (
-            <div className="zheat-scroll">
-              <div className="zheat">
-                <div className="zheat-grid">
-                  {heatmap.weeks.map((week, wi) => (
-                    <div className="zheat-col" key={wi}>
-                      {week.map((day, di) => (
-                        <div
-                          key={di}
-                          className="zheat-cell"
-                          title={
-                            day.inRange
-                              ? `${day.key}: ₹ ${Number(day.pnl).toLocaleString("en-IN")}`
-                              : ""
+              <div className="chart-grid">
+                <ChartCard title="Equity Curve">
+                  {dailyPnl.length === 0 ? (
+                    <Empty />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={260}>
+                      <LineChart data={cumulativeData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => `₹ ${v}`} />
+                        <Line
+                          dataKey="cumulative"
+                          stroke={
+                            lastPoint?.cumulative >= 0 ? "#16a34a" : "#dc2626"
                           }
-                          style={{
-                            background: day.inRange
-                              ? cellColor(day.pnl)
-                              : "transparent",
-                          }}
+                          strokeWidth={2}
+                          dot={false}
                         />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-                <div className="zheat-months">
-                  {heatmap.weeks.map((_, wi) => {
-                    const m = heatmap.months.find((mm) => mm.wi === wi);
-                    return (
-                      <div className="zheat-month" key={wi}>
-                        {m ? m.label : ""}
-                      </div>
-                    );
-                  })}
-                </div>
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </ChartCard>
+
+                <ChartCard title="Drawdown">
+                  {dailyPnl.length === 0 ? (
+                    <Empty />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={260}>
+                      <LineChart data={getDrawdownData()}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip formatter={(v) => `₹ ${v}`} />
+                        <Line dataKey="drawdown" stroke="#dc2626" dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  )}
+                </ChartCard>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* TABLE */}
-        <div className="section-block">
-          <h3 className="section-title">
-            Trade History
-            <span className="section-title-right">
-              {history.length} trade{history.length === 1 ? "" : "s"}
-            </span>
-          </h3>
+            {/* SECOND ROW */}
+            <div className="section-block">
+              <h3 className="section-title">Distribution &amp; Strategy</h3>
 
-          <div className="analytics-table-wrap">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Strategy</th>
-                  <th>Instrument</th>
-                  <th>PnL</th>
-                  <th></th>
-                </tr>
-              </thead>
+              <div className="chart-grid">
+                <ChartCard title="Daily PnL">
+                  {dailyPnl.length === 0 ? (
+                    <Empty />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart data={dailyPnl}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip />
+                        <Bar
+                          dataKey="pnl"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </ChartCard>
 
-              <tbody>
-                {history.length === 0 ? (
-                  <tr>
-                    <td colSpan="5">
-                      <Empty />
-                    </td>
-                  </tr>
-                ) : (
-                  history.map((t) => (
-                    <React.Fragment key={t._id}>
-                      <tr
-                        onClick={() =>
-                          setExpanded(expanded === t._id ? null : t._id)
-                        }
-                      >
-                       <td>{new Date(t.exitTime).toLocaleDateString()}</td>
-                        <td>{prettyStrategy(t.strategy)}</td>
-                        <td>{t.instrument}</td>
-                        <td className={t.netPnl >= 0 ? "profit" : "loss"}>
-                          ₹ {t.netPnl}
-                        </td>
-                        <td className="trade-caret-cell">
-                          <span className={`trade-caret ${expanded === t._id ? "open" : ""}`}>
-                            <svg viewBox="0 0 24 24" width="20" height="20">
-                              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </span>
+                <ChartCard title="Strategy Performance">
+                  {Object.keys(strategyData).length === 0 ? (
+                    <Empty />
+                  ) : (
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart data={getStrategyChartData()}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eef2f6" />
+                        <XAxis dataKey="strategy" tick={{ fontSize: 11 }} />
+                        <YAxis tick={{ fontSize: 11 }} />
+                        <Tooltip />
+                        <Bar
+                          dataKey="pnl"
+                          fill="#2563eb"
+                          radius={[4, 4, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </ChartCard>
+              </div>
+            </div>
+
+            {/* HEATMAP */}
+            <div className="section-block">
+              <h3 className="section-title">
+                Performance Heatmap
+                {fromDate && toDate && (
+                  <span className="section-title-right">
+                    {fromDate} to {toDate}
+                  </span>
+                )}
+              </h3>
+              {heatmap.weeks.length === 0 ? (
+                <Empty />
+              ) : (
+                <div className="zheat-scroll">
+                  <div className="zheat">
+                    <div className="zheat-grid">
+                      {heatmap.weeks.map((week, wi) => (
+                        <div className="zheat-col" key={wi}>
+                          {week.map((day, di) => (
+                            <div
+                              key={di}
+                              className="zheat-cell"
+                              title={
+                                day.inRange
+                                  ? `${day.key}: ₹ ${Number(day.pnl).toLocaleString("en-IN")}`
+                                  : ""
+                              }
+                              style={{
+                                background: day.inRange
+                                  ? cellColor(day.pnl)
+                                  : "transparent",
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="zheat-months">
+                      {heatmap.weeks.map((_, wi) => {
+                        const m = heatmap.months.find((mm) => mm.wi === wi);
+                        return (
+                          <div className="zheat-month" key={wi}>
+                            {m ? m.label : ""}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* TABLE */}
+            <div className="section-block">
+              <h3 className="section-title">
+                Trade History
+                <span className="section-title-right">
+                  {history.length} trade{history.length === 1 ? "" : "s"}
+                </span>
+              </h3>
+
+              <div className="analytics-table-wrap">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Strategy</th>
+                      <th>Instrument</th>
+                      <th>PnL</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {history.length === 0 ? (
+                      <tr>
+                        <td colSpan="5">
+                          <Empty />
                         </td>
                       </tr>
+                    ) : (
+                      history.map((t) => (
+                        <React.Fragment key={t._id}>
+                          <tr
+                            onClick={() =>
+                              setExpanded(expanded === t._id ? null : t._id)
+                            }
+                          >
+                            <td>{new Date(t.exitTime).toLocaleDateString()}</td>
+                            <td>{prettyStrategy(t.strategy)}</td>
+                            <td>{t.instrument}</td>
+                            <td className={t.netPnl >= 0 ? "profit" : "loss"}>
+                              ₹ {t.netPnl}
+                            </td>
+                            <td className="trade-caret-cell">
+                              <span
+                                className={`trade-caret ${expanded === t._id ? "open" : ""}`}
+                              >
+                                <svg viewBox="0 0 24 24" width="20" height="20">
+                                  <path
+                                    d="M6 9l6 6 6-6"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              </span>
+                            </td>
+                          </tr>
 
-                      {expanded === t._id && (
-                        <tr className="trade-detail-row">
-                          <td colSpan="5">
-                            <div className="trade-detail">
-                              <table className="trade-detail-table">
-                                <thead>
-                                  <tr>
-                                    <th>Type</th>
-                                    <th>Symbol</th>
-                                    <th>Qty</th>
-                                    <th>Entry</th>
-                                    <th>Entry Value</th>
-                                    <th>Exit</th>
-                                    <th>Exit Value</th>
-                                    <th>Realised P&amp;L</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {t.legs?.map((l, i) => {
-                                    const qty = Number(l.qty || 0);
-                                    const entry = Number(l.entryPrice || 0);
-                                    const exit = Number(l.exitPrice || 0);
-                                    const inr = (n) =>
-                                      Number(n || 0).toLocaleString("en-IN", {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      });
-                                    return (
-                                      <tr key={i}>
-                                        <td data-label="Type">
-                                          <span
-                                            className={`leg-badge ${
-                                              String(l.type).startsWith("BUY")
-                                                ? "leg-buy"
-                                                : "leg-sell"
-                                            }`}
-                                          >
-                                            {l.type}
-                                          </span>
-                                        </td>
-                                        <td data-label="Symbol">{formatSymbol(l.symbol)}</td>
-                                        <td data-label="Qty">{qty}</td>
-                                        <td data-label="Entry">₹ {entry.toFixed(2)}</td>
-                                        <td data-label="Entry Value">₹ {inr(qty * entry)}</td>
-                                        <td data-label="Exit">₹ {exit.toFixed(2)}</td>
-                                        <td data-label="Exit Value">₹ {inr(qty * exit)}</td>
-                                        <td
-                                          data-label="Realised P&L"
-                                          className={Number(l.pnl) >= 0 ? "profit" : "loss"}
-                                        >
-                                          {Number(l.pnl) >= 0 ? "+" : ""}₹ {inr(l.pnl)}
-                                        </td>
+                          {expanded === t._id && (
+                            <tr className="trade-detail-row">
+                              <td colSpan="5">
+                                <div className="trade-detail">
+                                  <table className="trade-detail-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Type</th>
+                                        <th>Symbol</th>
+                                        <th>Qty</th>
+                                        <th>Entry</th>
+                                        <th>Entry Value</th>
+                                        <th>Exit</th>
+                                        <th>Exit Value</th>
+                                        <th>Realised P&amp;L</th>
                                       </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          
-        </div>
-        </>
+                                    </thead>
+                                    <tbody>
+                                      {t.legs?.map((l, i) => {
+                                        const qty = Number(l.qty || 0);
+                                        const entry = Number(l.entryPrice || 0);
+                                        const exit = Number(l.exitPrice || 0);
+                                        const inr = (n) =>
+                                          Number(n || 0).toLocaleString(
+                                            "en-IN",
+                                            {
+                                              minimumFractionDigits: 2,
+                                              maximumFractionDigits: 2,
+                                            },
+                                          );
+                                        const pnl = Number(l.pnl || 0);
+                                        return (
+                                          <tr key={i}>
+                                            <td data-label="Type">
+                                              <span
+                                                className={`leg-badge ${String(l.type).startsWith("BUY") ? "leg-buy" : "leg-sell"}`}
+                                              >
+                                                {l.type}
+                                              </span>
+                                            </td>
+                                            <td data-label="Symbol">
+                                              {formatSymbol(l.symbol)}
+                                            </td>
+                                            <td data-label="Qty">{qty}</td>
+                                            <td data-label="Entry">
+                                              ₹ {entry.toFixed(2)}
+                                            </td>
+                                            <td data-label="Entry Value">
+                                              ₹ {inr(qty * entry)}
+                                            </td>
+                                            <td data-label="Exit">
+                                              ₹ {exit.toFixed(2)}
+                                            </td>
+                                            <td data-label="Exit Value">
+                                              ₹ {inr(qty * exit)}
+                                            </td>
+                                            <td
+                                              data-label="Realised P&L"
+                                              className={
+                                                pnl >= 0 ? "profit" : "loss"
+                                              }
+                                            >
+                                              {pnl >= 0 ? "+" : ""}₹ {inr(pnl)}
+                                            </td>
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
       <Footer />

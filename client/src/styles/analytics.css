@@ -11,8 +11,15 @@
   gap: 10px;
 }
 
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
 .page-title::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: linear-gradient(90deg, #e2e8f0 0%, transparent 100%);
@@ -30,7 +37,9 @@
   background: white;
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 4px 12px rgba(15, 23, 42, 0.03);
 }
 
 /* ================= DATE GROUP ================= */
@@ -58,7 +67,10 @@
   font-size: 13px;
   font-weight: 500;
   color: #1e293b;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
   cursor: pointer;
   min-width: 140px;
 }
@@ -147,7 +159,9 @@
   flex-direction: column;
   gap: 6px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
   position: relative;
   overflow: hidden;
 }
@@ -184,8 +198,12 @@
   gap: 3px;
 }
 
-.kpi-delta.up   { color: #059669; }
-.kpi-delta.down { color: #dc2626; }
+.kpi-delta.up {
+  color: #059669;
+}
+.kpi-delta.down {
+  color: #dc2626;
+}
 
 /* ================= SECTION BLOCK ================= */
 
@@ -195,7 +213,9 @@
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 16px;
   padding: 18px 20px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03), 0 6px 16px rgba(15, 23, 42, 0.03);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.03),
+    0 6px 16px rgba(15, 23, 42, 0.03);
 }
 
 .section-title {
@@ -225,7 +245,7 @@
   gap: 14px;
 }
 .chart-card {
-  min-width: 0;   
+  min-width: 0;
 }
 
 /* ================= CHART CARD ================= */
@@ -281,7 +301,9 @@
 .heat-cell {
   aspect-ratio: 1;
   border-radius: 4px;
-  transition: transform 0.14s ease, opacity 0.14s ease;
+  transition:
+    transform 0.14s ease,
+    opacity 0.14s ease;
   cursor: pointer;
 }
 
@@ -397,10 +419,38 @@
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 768px) {
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .page-title {
+    margin: 0;
+  }
   .analytics-filters {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
     gap: 10px;
+  }
+
+  /* default: every filter item takes its own full-width row */
+  .analytics-filters > * {
+    flex: 1 1 100%;
+  }
+
+  /* FROM and TO sit side by side */
+  .analytics-filters > .date-group:nth-of-type(1),
+  .analytics-filters > .date-group:nth-of-type(2) {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 0;
+  }
+
+  .analytics-filters .date-group input,
+  .analytics-filters .date-group select {
+    min-width: 0;
+    width: 100%;
   }
 
   .filter-chips {
@@ -417,6 +467,12 @@
 
   .analytics-kpi-row {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 800px) {
+  .analytics-filters {
+    justify-content: flex-end;
   }
 }
 /* ================= STRATEGY SELECT (matches date inputs) ================= */
@@ -437,7 +493,10 @@
   min-width: 170px;
   appearance: none;
   -webkit-appearance: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .date-group select:hover {
@@ -453,8 +512,12 @@
 }
 
 /* KPI value can carry profit/loss colour on analytics cards */
-.analytics-kpi-card .kpi-value.profit { color: #16a34a; }
-.analytics-kpi-card .kpi-value.loss   { color: #dc2626; }
+.analytics-kpi-card .kpi-value.profit {
+  color: #16a34a;
+}
+.analytics-kpi-card .kpi-value.loss {
+  color: #dc2626;
+}
 
 /* ================= TRADE DETAIL (expanded row) ================= */
 .trade-caret-cell {
@@ -523,10 +586,16 @@
   font-weight: 700;
   white-space: nowrap;
 }
-.leg-badge.leg-buy  { background: #dcfce7; color: #15803d; }
-.leg-badge.leg-sell { background: #fee2e2; color: #b91c1c; }
+.leg-badge.leg-buy {
+  background: #dcfce7;
+  color: #15803d;
+}
+.leg-badge.leg-sell {
+  background: #fee2e2;
+  color: #b91c1c;
+}
 
-/* ================= ZERODHA-STYLE CALENDAR HEATMAP ================= */
+/* ================= CALENDAR HEATMAP ================= */
 .zheat-scroll {
   overflow-x: auto;
   padding-bottom: 4px;
@@ -576,4 +645,30 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
+.filters-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  align-self: center;
+}
 
+.filters-label-icon {
+  font-size: 15px;
+}
+
+@media (min-width: 800px) {
+  .filters-label {
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-label {
+    display: none;
+  }
+}

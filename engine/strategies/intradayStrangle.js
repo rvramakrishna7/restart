@@ -1,6 +1,11 @@
 const logger = require("../../utils/logger");
 const { sendAlert } = require("../../services/notify");
-const money = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n) =>
+  "₹" +
+  Number(n || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 // =====================================================================
 // INTRADAY STRANGLE — Adjustment Engine
@@ -66,7 +71,11 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
     return;
   }
   // ── cooldown: skip if adjustment fired within last 3 seconds ──
-  if (position._strangleAdjustedAt && Date.now() - position._strangleAdjustedAt < 3000) return;
+  if (
+    position._strangleAdjustedAt &&
+    Date.now() - position._strangleAdjustedAt < 3000
+  )
+    return;
   // ── MAX LOSS CHECK (same rule as straddle: exit ALL legs) ──
   const maxLossPerLot = STRANGLE.MAX_LOSS_PER_LOT[position.index];
   const lots = position.lots || 1;
@@ -89,8 +98,8 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
   const ceEntry = ceLeg.entryPremium;
   const peEntry = peLeg.entryPremium;
 
-  const RISE = STRANGLE.RISE_TRIGGER_PCT;  
-  const DECAY = STRANGLE.DECAY_TRIGGER_PCT; 
+  const RISE = STRANGLE.RISE_TRIGGER_PCT;
+  const DECAY = STRANGLE.DECAY_TRIGGER_PCT;
 
   // ── minimum distance from current futures price ──
   const isBnf = position.index === "BANKNIFTY";
@@ -117,7 +126,7 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
 
     // Find new CE strike matching PE's current LTP
     const targetPremium = peCurrent;
-   const newCEEntry = findClosestByPremium(
+    const newCEEntry = findClosestByPremium(
       chain,
       "CE",
       targetPremium,
@@ -162,10 +171,10 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       const legPnl = (ceEntry - ceExitPrice) * qty;
       sendAlert(
         `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
-        `Reason: CE rose ${((ceCurrent / ceEntry - 1) * 100).toFixed(0)}% (${money(ceEntry)} → ${money(ceCurrent)})\n` +
-        `Exited CE ${ceLeg.strike} @ ${money(ceExitPrice)} (${signed(legPnl)})\n` +
-        `New CE ${newCEEntry.strike} @ ${money(newCEEntry.CE)} (matching PE LTP ${money(peCurrent)})\n` +
-        `Net P&L: ${signed(position.st_realizedPnl)}`,
+          `Reason: CE rose ${((ceCurrent / ceEntry - 1) * 100).toFixed(0)}% (${money(ceEntry)} → ${money(ceCurrent)})\n` +
+          `Exited CE ${ceLeg.strike} @ ${money(ceExitPrice)} (${signed(legPnl)})\n` +
+          `New CE ${newCEEntry.strike} @ ${money(newCEEntry.CE)} (matching PE LTP ${money(peCurrent)})\n` +
+          `Net P&L: ${signed(position.st_realizedPnl)}`,
       );
     } catch (e) {}
 
@@ -229,10 +238,10 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       const legPnl = (peEntry - peExitPrice) * qty;
       sendAlert(
         `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
-        `Reason: PE rose ${((peCurrent / peEntry - 1) * 100).toFixed(0)}% (${money(peEntry)} → ${money(peCurrent)})\n` +
-        `Exited PE ${peLeg.strike} @ ${money(peExitPrice)} (${signed(legPnl)})\n` +
-        `New PE ${newPEEntry.strike} @ ${money(newPEEntry.PE)} (matching CE LTP ${money(ceCurrent)})\n` +
-        `Net P&L: ${signed(position.st_realizedPnl)}`,
+          `Reason: PE rose ${((peCurrent / peEntry - 1) * 100).toFixed(0)}% (${money(peEntry)} → ${money(peCurrent)})\n` +
+          `Exited PE ${peLeg.strike} @ ${money(peExitPrice)} (${signed(legPnl)})\n` +
+          `New PE ${newPEEntry.strike} @ ${money(newPEEntry.PE)} (matching CE LTP ${money(ceCurrent)})\n` +
+          `Net P&L: ${signed(position.st_realizedPnl)}`,
       );
     } catch (e) {}
 
@@ -295,10 +304,10 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       const legPnl = (peEntry - peExitPrice) * qty;
       sendAlert(
         `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
-        `Reason: PE decayed ${((1 - peCurrent / peEntry) * 100).toFixed(0)}% (${money(peEntry)} → ${money(peCurrent)})\n` +
-        `Booked PE ${peLeg.strike} @ ${money(peExitPrice)} (${signed(legPnl)})\n` +
-        `New PE ${newPEEntry.strike} @ ${money(newPEEntry.PE)} (matching CE LTP ${money(ceCurrent)})\n` +
-        `Net P&L: ${signed(position.st_realizedPnl)}`,
+          `Reason: PE decayed ${((1 - peCurrent / peEntry) * 100).toFixed(0)}% (${money(peEntry)} → ${money(peCurrent)})\n` +
+          `Booked PE ${peLeg.strike} @ ${money(peExitPrice)} (${signed(legPnl)})\n` +
+          `New PE ${newPEEntry.strike} @ ${money(newPEEntry.PE)} (matching CE LTP ${money(ceCurrent)})\n` +
+          `Net P&L: ${signed(position.st_realizedPnl)}`,
       );
     } catch (e) {}
 
@@ -353,17 +362,17 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
     position.history.push({
       type: "STRANGLE_CE_DECAY",
       message: `CE ${ceLeg.strike} decayed to ${ceCurrent} (was ${ceEntry}). Closed. New CE ${newCEEntry.strike}@${newCEEntry.CE} matching PE ${peCurrent}`,
-     time: new Date().toISOString(),
+      time: new Date().toISOString(),
     });
 
     try {
       const legPnl = (ceEntry - ceExitPrice) * qty;
       sendAlert(
         `🔄 STRANGLE ADJUSTMENT | ${position.index}\n` +
-        `Reason: CE decayed ${((1 - ceCurrent / ceEntry) * 100).toFixed(0)}% (${money(ceEntry)} → ${money(ceCurrent)})\n` +
-        `Booked CE ${ceLeg.strike} @ ${money(ceExitPrice)} (${signed(legPnl)})\n` +
-        `New CE ${newCEEntry.strike} @ ${money(newCEEntry.CE)} (matching PE LTP ${money(peCurrent)})\n` +
-        `Net P&L: ${signed(position.st_realizedPnl)}`,
+          `Reason: CE decayed ${((1 - ceCurrent / ceEntry) * 100).toFixed(0)}% (${money(ceEntry)} → ${money(ceCurrent)})\n` +
+          `Booked CE ${ceLeg.strike} @ ${money(ceExitPrice)} (${signed(legPnl)})\n` +
+          `New CE ${newCEEntry.strike} @ ${money(newCEEntry.CE)} (matching PE LTP ${money(peCurrent)})\n` +
+          `Net P&L: ${signed(position.st_realizedPnl)}`,
       );
     } catch (e) {}
 

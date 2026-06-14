@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback  } from "react";
 import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -13,7 +13,30 @@ gsap.registerPlugin(ScrollTrigger);
  * Mobile : NO pin — sections stack and fade up (fixes overlap + dead scroll).
  */
 
+const Typewriter = ({ text, speed = 60, onDone, className }) => {
+  const [shown, setShown] = useState("");
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setShown(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(interval);
+        onDone && onDone();
+      }
+    }, speed);
+    return () => clearInterval(interval);
+  }, [text, speed, onDone]);
+
+  return <span className={className}>{shown}</span>;
+};
+
 const Product = () => {
+  const [introDone, setIntroDone] = useState(false);
+  const [ctaStarted, setCtaStarted] = useState(false);
+  const handleIntroDone = useCallback(() => setIntroDone(true), []);
+  const ctaRef = useRef(null);
   const navigate = useNavigate();
   const root = useRef(null);
 
@@ -99,34 +122,57 @@ const Product = () => {
           },
         });
         tl.from(".rp-dash", { scale: 0.94, opacity: 0, duration: 0.5 })
-          .from(".rp-kpi", { y: 26, opacity: 0, stagger: 0.1, duration: 0.4 }, "-=0.15")
+          .from(
+            ".rp-kpi",
+            { y: 26, opacity: 0, stagger: 0.1, duration: 0.4 },
+            "-=0.15",
+          )
           .fromTo(
             ".rp-spark-path",
             { strokeDashoffset: 560 },
             { strokeDashoffset: 0, duration: 0.7, ease: "power2.out" },
-            "-=0.1"
+            "-=0.1",
           )
           .from(".rp-spark-fill", { opacity: 0, duration: 0.4 }, "<0.25")
-          .from(".rp-prow", { x: -24, opacity: 0, stagger: 0.08, duration: 0.35 }, "-=0.3")
-          .to(".rp-act-1", { opacity: 1, duration: 0.25 }, 0)
-          .to(".rp-act-1", { opacity: 0, duration: 0.25 }, ">0.3")
-          .to(".rp-dash", { y: -30, opacity: 0, scale: 0.97, duration: 0.5 }, ">0.15")
+          .from(
+            ".rp-prow",
+            { x: -24, opacity: 0, stagger: 0.08, duration: 0.35 },
+            "-=0.3",
+          )
+          .to(".rp-act-1", { opacity: 1, duration: 0.5 }, 0)
+          .to(".rp-act-1", { opacity: 0, duration: 0.5 }, ">0.6")
+          .to(
+            ".rp-dash",
+            { y: -30, opacity: 0, scale: 0.97, duration: 0.5 },
+            ">0.15",
+          )
           .from(
             ".rp-node",
-            { scale: 0, opacity: 0, stagger: 0.14, duration: 0.45, ease: "back.out(1.6)" },
-            ">-0.15"
+            {
+              scale: 0,
+              opacity: 0,
+              stagger: 0.14,
+              duration: 0.45,
+              ease: "back.out(1.6)",
+            },
+            ">-0.15",
           )
           .from(
             ".rp-pipe",
-            { scaleX: 0, transformOrigin: "left center", stagger: 0.16, duration: 0.35 },
-            "<0.1"
+            {
+              scaleX: 0,
+              transformOrigin: "left center",
+              stagger: 0.16,
+              duration: 0.35,
+            },
+            "<0.1",
           )
           .to(".rp-act-2", { opacity: 1, duration: 0.25 }, "<")
           .fromTo(
             ".rp-pulse",
             { left: "2%", opacity: 0 },
             { left: "98%", opacity: 1, duration: 1.0, ease: "power1.inOut" },
-            ">0.1"
+            ">0.1",
           )
           .to(".rp-pulse", { opacity: 0, duration: 0.2 });
       });
@@ -148,7 +194,7 @@ const Product = () => {
             duration: 1.1,
             ease: "power2.out",
             scrollTrigger: { trigger: ".rp-dash", start: "top 70%" },
-          }
+          },
         );
         gsap.from(".rp-node", {
           y: 26,
@@ -163,6 +209,23 @@ const Product = () => {
 
     return () => ctx.revert();
   }, []);
+  useEffect(() => {
+  const el = ctaRef.current;
+  if (!el) return;
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        setCtaStarted(true);
+        observer.disconnect(); // run only once
+      }
+    },
+    { threshold: 0.4 }
+  );
+
+  observer.observe(el);
+  return () => observer.disconnect();
+}, []);
 
   return (
     <div className="rp-page" ref={root}>
@@ -204,52 +267,23 @@ const Product = () => {
             </span>
           </h1>
           <p className="rp-hero-sub">
-            Build. Test. Automate. <br/> Most traders know their rules. The problem is following them. <br/>
-            Restart Options transforms rule-based option strategies into disciplined execution systems.<br/> No fear. No greed. No hesitation. Just execution.
+            Build. Test. Automate. <br /> Most traders know their rules. The
+            problem is following them. <br />
+            Restart Options transforms rule-based option strategies into
+            disciplined execution systems.
+            <br /> No fear. No greed. No hesitation. Just execution.
           </p>
-          
         </div>
-        {/* ===== SCROLL CUE — animated candle ===== */}
-<div className="rp-scroll-cue candle-green" ref={(el) => {
-  if (!el) return;
-  const patterns = [
-    // [wick-top, body, wick-bot, isGreen]
-    [8,  32, 8,  true],   // normal green
-    [14, 28, 4,  true],   // hammer (long top wick)
-    [4,  28, 14, true],   // inverted hammer
-    [10, 32, 10, false],  // normal red
-    [14, 26, 4,  false],  // shooting star
-    [4,  26, 16, false],  // hanging man
-    [12, 20, 12, true],   // doji-like green
-    [6,  36, 6,  true],   // tall green
-    [6,  36, 6,  false],  // tall red
-  ];
-  let i = 0;
-  const animate = () => {
-    const [wt, body, wb, green] = patterns[i % patterns.length];
-    el.classList.toggle("candle-green", green);
-    el.classList.toggle("candle-red", !green);
-    el.querySelector(".wick-top").style.height = wt + "px";
-    el.querySelector(".candle-body").style.height = body + "px";
-    el.querySelector(".wick-bot").style.height = wb + "px";
-    i = Math.floor(Math.random() * patterns.length);
-    setTimeout(animate, 900 + Math.random() * 700);
-  };
-  setTimeout(animate, 800);
-}}>
-  <div className="wick-top" />
-  <div className="candle-body" />
-  <div className="wick-bot" />
-</div>
       </section>
-
-      
 
       {/* ===== PINNED SCROLL STORY ===== */}
       <section className="rp-stage" id="story">
         <div className="rp-stage-inner">
+          
           <div className="rp-act rp-act-1">From strategy to execution...</div>
-          <div className="rp-act rp-act-2">Discipline executing every decision...</div>
+          <div className="rp-act rp-act-2">
+            Discipline executing every decision...
+          </div>
 
           <div className="rp-dash">
             <div className="rp-dash-bar">
@@ -266,7 +300,7 @@ const Product = () => {
               <div className="rp-kpis">
                 <div className="rp-kpi">
                   <span>Total P&amp;L</span>
-                  <b className="rp-up">+₹12,480</b>
+                  <b className="rp-up">₹12,480</b>
                 </div>
                 <div className="rp-kpi">
                   <span>Win Rate</span>
@@ -346,8 +380,8 @@ const Product = () => {
           <div className="rp-fcopy">
             <h3>Validate before risking capital</h3>
             <p>
-              Forward-test your strategy on live market conditions. See how it behaves before a
-              single rupee is deployed.
+              Forward-test your strategy on live market conditions. See how it
+              behaves before a single rupee is deployed.
             </p>
           </div>
           <div className="rp-fvisual rp-fv-1">
@@ -359,8 +393,8 @@ const Product = () => {
           <div className="rp-fcopy">
             <h3>Risk management that never negotiates</h3>
             <p>
-              Stops. Targets. Adjustments. Executed exactly as planned, even when emotions say
-              otherwise.
+              Stops. Targets. Adjustments. Executed exactly as planned, even
+              when emotions say otherwise.
             </p>
           </div>
           <div className="rp-fvisual rp-fv-2">
@@ -372,8 +406,8 @@ const Product = () => {
           <div className="rp-fcopy">
             <h3>Know your edge</h3>
             <p>
-              Track expectancy, drawdowns, win rate, adjustment efficiency and long-term
-              performance. Confidence comes from data, not opinions.
+              Track expectancy, drawdowns, win rate, adjustment efficiency and
+              long-term performance. Confidence comes from data, not opinions.
             </p>
           </div>
           <div className="rp-fvisual rp-fv-3">
@@ -385,9 +419,9 @@ const Product = () => {
           <div className="rp-fcopy">
             <h3>Strategy Automation Engine</h3>
             <p>
-              Automate complex options strategies with predefined rules. Bull Call Spreads. Bear Put
-              Spreads. Dynamic strike shifting. Debit recovery adjustments. Risk-reward filtering.
-              Rule-based exits.
+              Automate complex options strategies with predefined rules. Bull
+              Call Spreads. Bear Put Spreads. Dynamic strike shifting. Debit
+              recovery adjustments. Risk-reward filtering. Rule-based exits.
             </p>
           </div>
           <div className="rp-fvisual rp-fv-1" data-icon="gear">
@@ -401,8 +435,8 @@ const Product = () => {
         <div className="rp-why-container">
           <h2>Why Most Traders Fail</h2>
           <p className="rp-why-intro">
-            Most traders don&apos;t fail because of bad strategies. They fail because they fail to
-            follow their own rules.
+            Most traders don&apos;t fail because of bad strategies. <br /> They
+            fail because they fail to follow their own rules.
           </p>
           <div className="rp-fail-grid">
             <div className="rp-fail-card">Move stop losses</div>
@@ -411,7 +445,9 @@ const Product = () => {
             <div className="rp-fail-card">Ignore risk limits</div>
             <div className="rp-fail-card">Trade emotionally</div>
           </div>
-          <div className="rp-fail-footer">Automation eliminates these mistakes and guarantees discipline..</div>
+          <div className="rp-fail-footer">
+            Automation eliminates these mistakes and guarantees discipline..
+          </div>
         </div>
       </section>
 
@@ -422,24 +458,44 @@ const Product = () => {
           <span className="rp-eyebrow rp-eyebrow-light">The philosophy</span>
           <h2>Discipline &gt; Opportunity.</h2>
           <p>
-            Every trader starts with rules. Most traders break them. Not because the strategy
-            failed. Because emotions took over. A stop loss became a hope trade. A target became
-            greed. A planned exit became hesitation. Restart Options exists to remove that gap. When
-            a rule is defined, the system executes it exactly as intended. No second guessing. No
-            revenge trading. No emotional overrides. Discipline becomes your edge.
+            Every trader starts with rules. Most traders break them. Not because
+            the strategy failed. Because emotions took over. A stop loss became
+            a hope trade. A target became greed. A planned exit became
+            hesitation. Restart Options exists to remove that gap. When a rule
+            is defined, the system executes it exactly as intended. No second
+            guessing. No revenge trading. No emotional overrides. Discipline
+            becomes your edge.
           </p>
-          <button className="rp-btn-primary" onClick={() => navigate("/contact")}>
+          <button
+            className="rp-btn-primary"
+            onClick={() => navigate("/contact")}
+          >
             Get started
           </button>
         </div>
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="rp-cta rp-reveal">
+      <section className="rp-cta rp-reveal" ref={ctaRef}>
         <h2 className="rp-cta-title">
-          The market is uncertain and dynamic. <br/> Your execution shouldn&apos;t be.
+          {ctaStarted ? (
+            <Typewriter
+              text="The market is uncertain and dynamic. Your execution shouldn't be."
+              speed={45}
+              onDone={handleIntroDone}
+            />
+          ) : (
+            <span style={{ visibility: "hidden" }}>
+              The market is uncertain and dynamic. Your execution shouldn't be.
+            </span>
+          )}
         </h2>
-        <p>Build your strategy. Test it. Automate it. <br/> Let discipline become your edge.</p>
+        {introDone && (
+          <p className="rp-cta-pop">
+            ⚡ Build your strategy. Test it. Automate it. <br /> Let discipline
+            become your edge.
+          </p>
+        )}
       </section>
 
       {/* ===== FOOTER ===== */}
@@ -450,19 +506,49 @@ const Product = () => {
             RESTART <span className="rp-logo-light">Options</span>
           </div>
           <div className="rp-footer-tagline">
-            Built for traders who believe consistency beats prediction and discipline beats emotion.
+            Built for traders who believe consistency beats prediction and
+            discipline beats emotion.
           </div>
         </div>
-        <div className="rp-disclaimer">
-          <strong>Important disclaimer.</strong> Restart Options is a software tool for the
-          analysis, backtesting, forward-testing and automation of user-defined trading strategies.
-          It is <em>not</em> involved in investment advice, stock-tip service, or a
-          portfolio-management service, and it is not a SEBI-registered investment adviser or
-          research analyst firm. We do not provide buy/sell recommendations or promise any returns.
-        </div>
+        <details className="rp-disclaimer">
+          <summary className="rp-disclaimer-summary">
+            Attention : Investors &amp; Traders
+            <svg
+              className="rp-disclaimer-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M6 9l6 6 6-6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </summary>
+          <div className="rp-disclaimer-body">
+            <strong>Important Disclaimer.</strong> Restart Options is a
+            technology platform designed to assist users with the analysis,
+            backtesting, forward-testing, monitoring, and automation of
+            user-defined trading strategies. Restart Options does not provide
+            investment advice, stock tips, trading recommendations, portfolio
+            management services, or research reports. We are not a
+            SEBI-registered Investment Adviser (IA), Research Analyst (RA), or
+            Portfolio Management Service (PMS) provider. All trading decisions
+            are made solely by the user, and users are responsible for
+            evaluating the suitability and risks of any strategy. Trading and
+            investing in financial markets involve substantial risk, and past
+            performance does not guarantee future results. Restart Options does
+            not guarantee profits, returns, or trading outcomes. Automation
+            guarantees discipline, not profits.
+          </div>
+        </details>
         <div className="rp-footer-bottom">
-          Made with <span className="rp-heart">♥</span> in India · © {new Date().getFullYear()}{" "}
-          Restart Options
+          Made with <span className="rp-heart">♥</span> in India · ©{" "}
+          {new Date().getFullYear()} Restart Options
         </div>
       </footer>
     </div>

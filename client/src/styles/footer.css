@@ -29,3 +29,51 @@
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.18); }
 }
+.rp-disclaimer {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.rp-disclaimer-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #cbd5e1;
+  list-style: none;
+}
+
+.rp-disclaimer-summary::-webkit-details-marker {
+  display: none;
+}
+
+.rp-disclaimer-arrow {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: #cbd5e1;
+}
+
+.rp-disclaimer[open] .rp-disclaimer-arrow {
+  transform: rotate(180deg);
+}
+
+.rp-disclaimer-body {
+  padding: 0 16px 16px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #94a3b8;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+@media (max-width: 768px) {
+  .rp-disclaimer-summary {
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+}

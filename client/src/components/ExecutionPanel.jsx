@@ -49,7 +49,10 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
   const seenEventsRef = useRef(new Set()); // tracks events already toasted
 
   const totalPnl = positions.reduce((sum, p) => sum + Number(p.pnl || 0), 0);
-  const totalPoints = positions.reduce((sum, p) => sum + Number(p.points || 0), 0);
+  const totalPoints = positions.reduce(
+    (sum, p) => sum + Number(p.points || 0),
+    0,
+  );
 
   // =====================
   // FETCH POSITIONS
@@ -157,9 +160,10 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
           if (p.status === "CLOSED") return p;
           const livePrice = ltpMapRef.current[p.token];
           if (!livePrice) return p;
-          const pnl = Number(p.qty) < 0
-            ? (Number(p.avgPrice) - livePrice) * Math.abs(Number(p.qty))
-            : (livePrice - Number(p.avgPrice)) * Number(p.qty);
+          const pnl =
+            Number(p.qty) < 0
+              ? (Number(p.avgPrice) - livePrice) * Math.abs(Number(p.qty))
+              : (livePrice - Number(p.avgPrice)) * Number(p.qty);
           return {
             ...p,
             ltp: Number(livePrice.toFixed(2)),
@@ -376,7 +380,9 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                     onClick={async () => {
                       try {
                         const mode = localStorage.getItem("mode") || "paper";
-                        await axios.post(`/api/strategy/exit-all?mode=${mode}${strategyType ? `&strategyType=${strategyType}` : ""}`);
+                        await axios.post(
+                          `/api/strategy/exit-all?mode=${mode}${strategyType ? `&strategyType=${strategyType}` : ""}`,
+                        );
                         await fetchPositions();
                       } catch (err) {
                         console.log("Exit all error:", err.message);
@@ -439,8 +445,13 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                           {formatTicker(p.symbol || "")}
                         </span>
                       </td>
-                      <td data-label="Points" className={Number(p.points) >= 0 ? "profit" : "loss"}>
-                        {p.points != null ? `${Number(p.points) >= 0 ? "+" : ""}${Number(p.points).toFixed(2)}` : "—"}
+                      <td
+                        data-label="Points"
+                        className={Number(p.points) >= 0 ? "profit" : "loss"}
+                      >
+                        {p.points != null
+                          ? `${Number(p.points) >= 0 ? "+" : ""}${Number(p.points).toFixed(2)}`
+                          : "—"}
                       </td>
                       <td data-label="Trade">
                         {/* ✅ FIX: use p.type from backend, NOT p.qty sign */}
@@ -450,15 +461,26 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                       </td>
                       <td data-label="Lots">{p.lots}</td>
                       <td data-label="Qty">{Math.abs(p.qty)}</td>
-                      <td data-label="Entry">{Number(p.avgPrice || 0).toFixed(2)}</td>
+                      <td data-label="Entry">
+                        {Number(p.avgPrice || 0).toFixed(2)}
+                      </td>
                       <td data-label="LTP">{Number(p.ltp || 0).toFixed(2)}</td>
-                      <td data-label="P&L" className={p.pnl >= 0 ? "profit" : "loss"}>
+                      <td
+                        data-label="P&L"
+                        className={p.pnl >= 0 ? "profit" : "loss"}
+                      >
                         ₹ {Number(p.pnl || 0).toFixed(2)}
                       </td>
-                      <td data-label="Entered" style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                      <td
+                        data-label="Entered"
+                        style={{ fontSize: "12px", whiteSpace: "nowrap" }}
+                      >
                         {formatTime(p.openedAt)}
                       </td>
-                      <td data-label="Exited"  style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                      <td
+                        data-label="Exited"
+                        style={{ fontSize: "12px", whiteSpace: "nowrap" }}
+                      >
                         {formatTime(p.closedAt)}
                       </td>
                       <td data-label="Status">
@@ -486,10 +508,22 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                       </td>
                     </tr>
                   ))}
-                  <tr className="total-row" style={{ borderTop: "2px solid #e2e8f0", fontWeight: 700 }}>
-                    <td data-label="" style={{ textAlign: "left", paddingLeft: "16px" }}>TOTAL</td>
-                    <td data-label="Total Points" className={totalPoints >= 0 ? "profit" : "loss"}>
-                      {totalPoints >= 0 ? "+" : ""}{totalPoints.toFixed(2)}
+                  <tr
+                    className="total-row"
+                    style={{ borderTop: "2px solid #e2e8f0", fontWeight: 700 }}
+                  >
+                    <td
+                      data-label=""
+                      style={{ textAlign: "left", paddingLeft: "16px" }}
+                    >
+                      TOTAL
+                    </td>
+                    <td
+                      data-label="Total Points"
+                      className={totalPoints >= 0 ? "profit" : "loss"}
+                    >
+                      {totalPoints >= 0 ? "+" : ""}
+                      {totalPoints.toFixed(2)}
                     </td>
                     <td colSpan="10"></td>
                   </tr>
@@ -504,18 +538,26 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
                 positions={positions}
               />
             )}
-            {events.filter((e) => e.strategyType === strategyType).length > 0 && (
+            {events.filter((e) => e.strategyType === strategyType).length >
+              0 && (
               <div className="activity-feed">
                 <div className="activity-title">Activity</div>
-                {events.filter((e) => e.strategyType === strategyType).slice(0, 8).map((e, i) => (
-                  <div key={i} className="activity-row">
-                    <span className="activity-time">{formatTime(e.time)}</span>
-                    <span className="activity-msg">
-                      {e.type === "MAX_LOSS" || e.type === "TARGET" ? "🚪" : "🔄"}{" "}
-                      {e.message}
-                    </span>
-                  </div>
-                ))}
+                {events
+                  .filter((e) => e.strategyType === strategyType)
+                  .slice(0, 8)
+                  .map((e, i) => (
+                    <div key={i} className="activity-row">
+                      <span className="activity-time">
+                        {formatTime(e.time)}
+                      </span>
+                      <span className="activity-msg">
+                        {e.type === "MAX_LOSS" || e.type === "TARGET"
+                          ? "🚪"
+                          : "🔄"}{" "}
+                        {e.message}
+                      </span>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
