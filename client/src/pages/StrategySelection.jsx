@@ -384,7 +384,231 @@ const StrategySelection = () => {
 
         <div className="main">
           <h2>Strategies</h2>
+          <div className="category-title">Intraday Strategies</div>
+          {/* ================= STRADDLE ROW ================= */}
+          <div
+            className={`strategy-row ${openCard.st ? "expanded" : "collapsed"}`}
+          >
+            <div
+              className="mobile-card-header"
+              onClick={() => toggleCard("st")}
+            >
+              <span className="mch-name">Straddle</span>
+              <span className="mch-right">
+                {stOpen && (
+                  <span className={`mch-pnl ${stPnl >= 0 ? "profit" : "loss"}`}>
+                    {stPnl >= 0 ? "+" : ""}₹{Math.abs(stPnl).toFixed(2)}
+                  </span>
+                )}
+                <span className={`mch-chevron ${openCard.st ? "open" : ""}`}>
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path
+                      d="M6 9l6 6 6-6"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </span>
+            </div>
+            <div className="strategy-name">Straddle</div>
+            <ModeToggle mode={stMode} setMode={setStMode} />
+            <button
+              className="reset-btn"
+              onClick={resetStraddle}
+              title="Reset straddle"
+              disabled={stRunning}
+            >
+              ↺
+            </button>
+
+            <div className="instrument-switch">
+              {["NIFTY", "BANKNIFTY"].map((inst) => (
+                <div
+                  key={inst}
+                  className={`chip ${stInstrument === inst ? "active" : ""}`}
+                  onClick={() => !stRunning && setStInstrument(inst)}
+                >
+                  {inst}
+                </div>
+              ))}
+            </div>
+
+            {stInstrument && (
+              <div className="expiry-switch">
+                {stExpiries.map((e, i) => (
+                  <div
+                    key={i}
+                    className={`chip ${stExpiry?.label === e.label ? "active" : ""}`}
+                    onClick={() => !stRunning && setStExpiry(e)}
+                  >
+                    {e.label}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {stExpiry && (
+              <div className="lot-inline">
+                <span>Lot</span>
+                <select
+                  value={stLots}
+                  onChange={(e) => setStLots(Number(e.target.value))}
+                >
+                  {[1, 2, 3, 4, 5].map((l) => (
+                    <option key={l}>{l}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <ExecutionPanel
+              triggerRefresh={stInstrument && stExpiry ? executeStraddle : null}
+              strategyType="INTRADAY_STRADDLE"
+            />
+          </div>
+
+          {/* ================= STRADDLE PREVIEW STRIP ================= */}
+          {!stRunning && stData && (
+            <div className="preview-row enhanced">
+              <span className="metric">
+                ATM: <b>{stData.atmStrike}</b>{" "}
+                <span className="buy">CE @ ₹{stData.cePremium}</span>{" "}
+                <span className="sell">PE @ ₹{stData.pePremium}</span>
+              </span>
+              <span className="metric">Combined: ₹{stData.combined}</span>
+              <span className="metric" style={{ color: "#f59e0b" }}>
+                Adjust on {stData.adjustPts}pt move
+              </span>
+              <span className="metric profit">
+                Max Profit: ₹
+                {Number((stData.combined * stData.quantity).toFixed(2))}
+              </span>
+              <span className="metric loss">Max Loss: ₹{stData.maxLoss}</span>
+              <span className="metric" style={{ color: "#6366f1" }}>
+                Futures: ₹{stData.futures}
+              </span>
+            </div>
+          )}
+
+          {/* ================= STRANGLE ROW ================= */}
+          <div
+            className={`strategy-row ${openCard.sg ? "expanded" : "collapsed"}`}
+          >
+            <div
+              className="mobile-card-header"
+              onClick={() => toggleCard("sg")}
+            >
+              <span className="mch-name">Strangle</span>
+              <span className="mch-right">
+                {sgOpen && (
+                  <span className={`mch-pnl ${sgPnl >= 0 ? "profit" : "loss"}`}>
+                    {sgPnl >= 0 ? "+" : ""}₹{Math.abs(sgPnl).toFixed(2)}
+                  </span>
+                )}
+                <span className={`mch-chevron ${openCard.sg ? "open" : ""}`}>
+                  <svg viewBox="0 0 24 24" width="18" height="18">
+                    <path
+                      d="M6 9l6 6 6-6"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </span>
+            </div>
+            <div className="strategy-name">Strangle</div>
+            <ModeToggle mode={sgMode} setMode={setSgMode} />
+            <button
+              className="reset-btn"
+              onClick={resetStrangle}
+              title="Reset strangle"
+              disabled={sgRunning}
+            >
+              ↺
+            </button>
+
+            <div className="instrument-switch">
+              {["NIFTY", "BANKNIFTY"].map((inst) => (
+                <div
+                  key={inst}
+                  className={`chip ${sgInstrument === inst ? "active" : ""}`}
+                  onClick={() => !sgRunning && setSgInstrument(inst)}
+                >
+                  {inst}
+                </div>
+              ))}
+            </div>
+
+            {sgInstrument && (
+              <div className="expiry-switch">
+                {sgExpiries.map((e, i) => (
+                  <div
+                    key={i}
+                    className={`chip ${sgExpiry?.label === e.label ? "active" : ""}`}
+                    onClick={() => !sgRunning && setSgExpiry(e)}
+                  >
+                    {e.label}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {sgExpiry && (
+              <div className="lot-inline">
+                <span>Lot</span>
+                <select
+                  value={sgLots}
+                  onChange={(e) => setSgLots(Number(e.target.value))}
+                >
+                  {[1, 2, 3, 4, 5].map((l) => (
+                    <option key={l}>{l}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <ExecutionPanel
+              triggerRefresh={sgInstrument && sgExpiry ? executeStrangle : null}
+              strategyType="INTRADAY_STRANGLE"
+            />
+          </div>
+
+          {/* ================= STRANGLE PREVIEW STRIP ================= */}
+          {!sgRunning && sgData && (
+            <div className="preview-row enhanced">
+              <span className="metric">
+                CE: <b>{sgData.ceStrike}</b>{" "}
+                <span className="buy">@ ₹{sgData.cePremium}</span>
+              </span>
+              <span className="metric">
+                PE: <b>{sgData.peStrike}</b>{" "}
+                <span className="sell">@ ₹{sgData.pePremium}</span>
+              </span>
+              <span className="metric">Combined: ₹{sgData.combined}</span>
+              <span className="metric" style={{ color: "#f59e0b" }}>
+                Range: {Math.round(sgData.ceStrike - sgData.peStrike)}pts
+              </span>
+              <span className="metric profit">
+                Max Profit: ₹
+                {Number((sgData.combined * sgData.quantity).toFixed(2))}
+              </span>
+              <span className="metric loss">Max Loss: ₹{sgData.maxLoss}</span>
+              <span className="metric" style={{ color: "#6366f1" }}>
+                Futures: ₹{sgData.futures}
+              </span>
+            </div>
+          )}
+
+          {/* ================= STRATEGY SECTIONS ================= */}
           <div className="category-title">Positional Strategies</div>
+
           {/* ================= STRATEGY CONTROLS ================= */}
           <div
             className={`strategy-row ${openCard.ds ? "expanded" : "collapsed"}`}
@@ -654,229 +878,6 @@ const StrategySelection = () => {
           {!ifRunning && !ifData && ifInstrument && ifExpiry && (
             <div className="no-trade">
               Discipline &gt; Opportunity. No valid iron fly right now.
-            </div>
-          )}
-
-          {/* ================= STRATEGY SECTIONS ================= */}
-          <div className="category-title">Intraday Strategies</div>
-          {/* ================= STRADDLE ROW ================= */}
-          <div
-            className={`strategy-row ${openCard.st ? "expanded" : "collapsed"}`}
-          >
-            <div
-              className="mobile-card-header"
-              onClick={() => toggleCard("st")}
-            >
-              <span className="mch-name">Straddle</span>
-              <span className="mch-right">
-                {stOpen && (
-                  <span className={`mch-pnl ${stPnl >= 0 ? "profit" : "loss"}`}>
-                    {stPnl >= 0 ? "+" : ""}₹{Math.abs(stPnl).toFixed(2)}
-                  </span>
-                )}
-                <span className={`mch-chevron ${openCard.st ? "open" : ""}`}>
-                  <svg viewBox="0 0 24 24" width="18" height="18">
-                    <path
-                      d="M6 9l6 6 6-6"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-              </span>
-            </div>
-            <div className="strategy-name">Straddle</div>
-            <ModeToggle mode={stMode} setMode={setStMode} />
-            <button
-              className="reset-btn"
-              onClick={resetStraddle}
-              title="Reset straddle"
-              disabled={stRunning}
-            >
-              ↺
-            </button>
-
-            <div className="instrument-switch">
-              {["NIFTY", "BANKNIFTY"].map((inst) => (
-                <div
-                  key={inst}
-                  className={`chip ${stInstrument === inst ? "active" : ""}`}
-                  onClick={() => !stRunning && setStInstrument(inst)}
-                >
-                  {inst}
-                </div>
-              ))}
-            </div>
-
-            {stInstrument && (
-              <div className="expiry-switch">
-                {stExpiries.map((e, i) => (
-                  <div
-                    key={i}
-                    className={`chip ${stExpiry?.label === e.label ? "active" : ""}`}
-                    onClick={() => !stRunning && setStExpiry(e)}
-                  >
-                    {e.label}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {stExpiry && (
-              <div className="lot-inline">
-                <span>Lot</span>
-                <select
-                  value={stLots}
-                  onChange={(e) => setStLots(Number(e.target.value))}
-                >
-                  {[1, 2, 3, 4, 5].map((l) => (
-                    <option key={l}>{l}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <ExecutionPanel
-              triggerRefresh={stInstrument && stExpiry ? executeStraddle : null}
-              strategyType="INTRADAY_STRADDLE"
-            />
-          </div>
-
-          {/* ================= STRADDLE PREVIEW STRIP ================= */}
-          {!stRunning && stData && (
-            <div className="preview-row enhanced">
-              <span className="metric">
-                ATM: <b>{stData.atmStrike}</b>{" "}
-                <span className="buy">CE @ ₹{stData.cePremium}</span>{" "}
-                <span className="sell">PE @ ₹{stData.pePremium}</span>
-              </span>
-              <span className="metric">Combined: ₹{stData.combined}</span>
-              <span className="metric" style={{ color: "#f59e0b" }}>
-                Adjust on {stData.adjustPts}pt move
-              </span>
-              <span className="metric profit">
-                Max Profit: ₹
-                {Number((stData.combined * stData.quantity).toFixed(2))}
-              </span>
-              <span className="metric loss">Max Loss: ₹{stData.maxLoss}</span>
-              <span className="metric" style={{ color: "#6366f1" }}>
-                Futures: ₹{stData.futures}
-              </span>
-            </div>
-          )}
-
-          {/* ================= STRANGLE ROW ================= */}
-          <div
-            className={`strategy-row ${openCard.sg ? "expanded" : "collapsed"}`}
-          >
-            <div
-              className="mobile-card-header"
-              onClick={() => toggleCard("sg")}
-            >
-              <span className="mch-name">Strangle</span>
-              <span className="mch-right">
-                {sgOpen && (
-                  <span className={`mch-pnl ${sgPnl >= 0 ? "profit" : "loss"}`}>
-                    {sgPnl >= 0 ? "+" : ""}₹{Math.abs(sgPnl).toFixed(2)}
-                  </span>
-                )}
-                <span className={`mch-chevron ${openCard.sg ? "open" : ""}`}>
-                  <svg viewBox="0 0 24 24" width="18" height="18">
-                    <path
-                      d="M6 9l6 6 6-6"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-              </span>
-            </div>
-            <div className="strategy-name">Strangle</div>
-            <ModeToggle mode={sgMode} setMode={setSgMode} />
-            <button
-              className="reset-btn"
-              onClick={resetStrangle}
-              title="Reset strangle"
-              disabled={sgRunning}
-            >
-              ↺
-            </button>
-
-            <div className="instrument-switch">
-              {["NIFTY", "BANKNIFTY"].map((inst) => (
-                <div
-                  key={inst}
-                  className={`chip ${sgInstrument === inst ? "active" : ""}`}
-                  onClick={() => !sgRunning && setSgInstrument(inst)}
-                >
-                  {inst}
-                </div>
-              ))}
-            </div>
-
-            {sgInstrument && (
-              <div className="expiry-switch">
-                {sgExpiries.map((e, i) => (
-                  <div
-                    key={i}
-                    className={`chip ${sgExpiry?.label === e.label ? "active" : ""}`}
-                    onClick={() => !sgRunning && setSgExpiry(e)}
-                  >
-                    {e.label}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {sgExpiry && (
-              <div className="lot-inline">
-                <span>Lot</span>
-                <select
-                  value={sgLots}
-                  onChange={(e) => setSgLots(Number(e.target.value))}
-                >
-                  {[1, 2, 3, 4, 5].map((l) => (
-                    <option key={l}>{l}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <ExecutionPanel
-              triggerRefresh={sgInstrument && sgExpiry ? executeStrangle : null}
-              strategyType="INTRADAY_STRANGLE"
-            />
-          </div>
-
-          {/* ================= STRANGLE PREVIEW STRIP ================= */}
-          {!sgRunning && sgData && (
-            <div className="preview-row enhanced">
-              <span className="metric">
-                CE: <b>{sgData.ceStrike}</b>{" "}
-                <span className="buy">@ ₹{sgData.cePremium}</span>
-              </span>
-              <span className="metric">
-                PE: <b>{sgData.peStrike}</b>{" "}
-                <span className="sell">@ ₹{sgData.pePremium}</span>
-              </span>
-              <span className="metric">Combined: ₹{sgData.combined}</span>
-              <span className="metric" style={{ color: "#f59e0b" }}>
-                Range: {Math.round(sgData.ceStrike - sgData.peStrike)}pts
-              </span>
-              <span className="metric profit">
-                Max Profit: ₹
-                {Number((sgData.combined * sgData.quantity).toFixed(2))}
-              </span>
-              <span className="metric loss">Max Loss: ₹{sgData.maxLoss}</span>
-              <span className="metric" style={{ color: "#6366f1" }}>
-                Futures: ₹{sgData.futures}
-              </span>
             </div>
           )}
         </div>
