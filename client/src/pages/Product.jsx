@@ -232,7 +232,9 @@ const Product = () => {
       {/* ===== NAV ===== */}
       <header className="rp-nav">
         <div className="rp-logo" onClick={() => navigate("/")}>
-          <span className="rp-logo-mark" />
+          
+          <div className="rp-logo-mark" />
+          
           RESTART <span className="rp-logo-light">Options</span>
         </div>
         <nav className="rp-nav-links">

@@ -319,6 +319,14 @@ export default function Analytics() {
             <div className="analytics-kpi-row">
               <Card title="Max Win Streak" value={streak.maxWin} />
               <Card title="Max Loss Streak" value={streak.maxLoss} />
+              <CardMulti
+                title="Capital ROI"
+                lines={[
+                  `Daily: ${summary.avgDailyRoi ?? 0}%`,
+                  `Weekly: ${summary.avgWeeklyRoi ?? 0}%`,
+                  `Monthly: ${summary.avgMonthlyRoi ?? 0}%`,
+                ]}
+              />
             </div>
 
             {/* CHARTS */}
@@ -547,6 +555,8 @@ export default function Analytics() {
                                         <th>Entry Value</th>
                                         <th>Exit</th>
                                         <th>Exit Value</th>
+                                        <th>Brokerage</th>
+                                        <th>Charges</th>
                                         <th>Realised P&amp;L</th>
                                       </tr>
                                     </thead>
@@ -589,13 +599,19 @@ export default function Analytics() {
                                             <td data-label="Exit Value">
                                               ₹ {inr(qty * exit)}
                                             </td>
+                                            <td data-label="Brokerage">
+                                              ₹ {inr((t.brokerageAmt || 0) / (t.legs?.length || 1))}
+                                            </td>
+                                            <td data-label="Charges">
+                                              ₹ {inr((t.chargesAmt || 0) / (t.legs?.length || 1))}
+                                            </td>
                                             <td
                                               data-label="Realised P&L"
                                               className={
-                                                pnl >= 0 ? "profit" : "loss"
+                                                (t.netPnlAfterCharges ?? pnl) >= 0 ? "profit" : "loss"
                                               }
                                             >
-                                              {pnl >= 0 ? "+" : ""}₹ {inr(pnl)}
+                                              {(t.netPnlAfterCharges ?? pnl) >= 0 ? "+" : ""}₹ {inr(i === 0 ? (t.netPnlAfterCharges ?? pnl) : pnl)}
                                             </td>
                                           </tr>
                                         );
@@ -650,6 +666,22 @@ function Empty() {
     <div className="analytics-empty">
       <div className="analytics-empty-icon">📊</div>
       <div className="analytics-empty-text">No trade data available</div>
+    </div>
+  );
+}
+
+function CardMulti({ title, lines }) {
+  return (
+    <div className="analytics-kpi-card">
+      <div className="kpi-title">{title}</div>
+      {lines.map((l, i) => (
+        <div
+          key={i}
+          style={{ fontSize: "14px", fontWeight: 700, color: "#0f172a", lineHeight: "1.6" }}
+        >
+          {l}
+        </div>
+      ))}
     </div>
   );
 }

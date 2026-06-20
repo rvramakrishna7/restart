@@ -46,7 +46,7 @@ exports.executeStrategy = async (req, res) => {
     if (!user?.broker?.connected || !user?.broker?.accessToken) {
       return res.status(400).json({
         success: false,
-        message: "Broker not connected. Please connect Zerodha first.",
+        message: "Broker not connected. Please connect broker first.",      
       });
     }
 

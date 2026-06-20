@@ -99,6 +99,8 @@ const TradeSchema = new mongoose.Schema(
       enum: ["paper", "live"],
       default: "live",
     },
+    lots: { type: Number, default: 1 },
+    strategyType: { type: String, default: "" },
   },
   { timestamps: true },
 );

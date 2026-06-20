@@ -87,10 +87,6 @@ class PositionManager {
       const saved = await PositionModel.create(position);
       position._id = saved._id;
       logger.log("💾 Position saved to DB");
-      // ── re-subscribe after 3 seconds to catch any missed initial ticks ──
-      // setTimeout(() => {
-      //   this.updateTokens();
-      // }, 3000);
       this.subscribeOtmTokens(position);
       this.updateTokens();
       // ── force resubscribe after 3 seconds to ensure new tokens are live ──
@@ -371,8 +367,7 @@ class PositionManager {
       const price = tick.last_price;
 
       for (let pos of this.positions) {
-        // ── TYPE DEBUG — remove after fix confirmed ──
-        // ── TYPE DEBUG — debit spread only ──
+        
         if (!pos._tokenTypeLogged && pos.buyToken) {
           pos._tokenTypeLogged = true;
           logger.log(
@@ -954,6 +949,72 @@ class PositionManager {
         );
       } catch (e) {}
 
+      // ── Calculate brokerage + charges ──
+      const _calcCharges = (legsArr) => {
+        let brokerageAmt = 0;
+        let stt = 0;
+        let exchange = 0;
+        let sebi = 0;
+        let stamp = 0;
+
+        for (const leg of legsArr) {
+          const qty = Number(leg.qty || 0);
+          const entry = Number(leg.entryPrice || 0);
+          const exit = Number(leg.exitPrice || 0);
+          const entryTurnover = entry * qty;
+          const exitTurnover = exit * qty;
+
+          // Brokerage: ₹20 entry + ₹20 exit per leg
+          brokerageAmt += 40;
+
+          // STT: 0.15% on sell-leg exit premium × qty only
+          if (String(leg.type).startsWith("SELL")) {
+            stt += (0.15 / 100) * exitTurnover;
+          }
+
+          // Exchange NSE: 0.03553% on both entry and exit turnover
+          exchange += (0.03553 / 100) * (entryTurnover + exitTurnover);
+
+          // SEBI: ₹10 per crore on total turnover
+          sebi += (10 / 1e7) * (entryTurnover + exitTurnover);
+
+          // Stamp: 0.003% on buy-leg entry only
+          if (String(leg.type).startsWith("BUY")) {
+            stamp += (0.003 / 100) * entryTurnover;
+          }
+        }
+
+        // GST: 18% on (brokerage + exchange + sebi)
+        const gst = 0.18 * (brokerageAmt + exchange + sebi);
+        const otherCharges = Number(
+          (stt + exchange + sebi + gst + stamp).toFixed(2)
+        );
+        return {
+          brokerageAmt: Number(brokerageAmt.toFixed(2)),
+          otherCharges,
+        };
+      };
+
+      // Collect all legs including adjustment legs
+      const _allLegs = [...legs];
+      for (const adj of (position.history || [])) {
+        if (adj.legsAdded) _allLegs.push(...adj.legsAdded);
+        if (adj.legsClosed) _allLegs.push(...adj.legsClosed);
+      }
+
+      const isIronFly =
+        (position.strategyType || "").includes("IRON") ||
+        (strategyLabel || "").includes("IRON") ||
+        (strategyLabel || "").toLowerCase().includes("iron");
+
+      const { brokerageAmt, otherCharges } = isIronFly
+        ? { brokerageAmt: 0, otherCharges: 0 }
+        : _calcCharges(_allLegs);
+
+      const finalNetPnl = Number(
+        (netPnl - brokerageAmt - otherCharges).toFixed(2)
+      );
+
       await Trade.create({
         userId: position.userId,
         strategy: strategyLabel,
@@ -969,9 +1030,11 @@ class PositionManager {
             reason: h.type || h.action,
           })) || [],
         totalPnl: netPnl,
-        brokerage: 0,
-        charges: 0,
-        netPnl,
+        brokerage: brokerageAmt,
+        charges: otherCharges,
+        netPnl: finalNetPnl,
+        lots: position.lots || 1,
+        strategyType: position.strategyType || position.type || "",
       });
 
       logger.log(

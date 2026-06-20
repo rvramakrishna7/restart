@@ -215,8 +215,8 @@ async function executeStrategy({
         transaction_type: "BUY",
         quantity: qty,
         product: "NRML",
-        order_type: "MARKET", // ✅ MUST
-        price: 0, // ✅ MUST
+        order_type: "MARKET", 
+        price: 0, 
       },
       {
         exchange: "NFO",
@@ -224,8 +224,8 @@ async function executeStrategy({
         transaction_type: "SELL",
         quantity: qty,
         product: "NRML",
-        order_type: "MARKET", // ✅ MUST
-        price: 0, // ✅ MUST
+        order_type: "MARKET", 
+        price: 0, 
       },
     ]);
 
