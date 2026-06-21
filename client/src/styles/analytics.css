@@ -91,16 +91,29 @@
 
 .apply-btn {
   height: 36px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-radius: 9px;
-  font-size: 12.5px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  white-space: nowrap;
-  align-self: flex-end;
+}
+
+.apply-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.apply-btn:active {
+  background: #1e40af;
 }
 
 /* ================= FILTER CHIPS ROW ================= */
@@ -182,12 +195,16 @@
 }
 
 .analytics-kpi-card .kpi-value {
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 500;
   letter-spacing: -0.6px;
   color: #0f172a;
   line-height: 1;
   padding-left: 0;
+}
+
+.analytics-kpi-card .kpi-value.light-red {
+  color: #f87171;
 }
 
 .analytics-kpi-card .kpi-delta {
@@ -670,5 +687,93 @@
 @media (max-width: 768px) {
   .filters-label {
     display: none;
+  }
+}
+
+/* ================= SLIPPAGE CONTROLS ================= */
+.slippage-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-self: flex-end;
+}
+
+.slippage-group label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.slippage-group input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3b82f6, #93c5fd);
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+}
+
+.slippage-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.slippage-group input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.slippage-group input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.35);
+  cursor: pointer;
+}
+
+/* Save Slip button — subtle ghost style */
+.save-slip-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: flex-end;
+  transition: all 0.15s ease;
+}
+
+.save-slip-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.save-slip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .slippage-group input[type="range"] {
+    width: 100%;
   }
 }

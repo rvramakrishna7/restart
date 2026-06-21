@@ -51,6 +51,26 @@ export default function Analytics() {
   const [mode, setMode] = useState("paper");
 
   const [hasApplied, setHasApplied] = useState(false);
+  const [slippage, setSlippage] = useState({ nifty: 1.5, banknifty: 2.5 });
+  const [slippageSaving, setSlippageSaving] = useState(false);
+
+  useEffect(() => {
+    axios
+      .get("/api/user/slippage")
+      .then((r) => {
+        if (r.data.success) setSlippage(r.data.data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const saveSlippage = async () => {
+    setSlippageSaving(true);
+    try {
+      await axios.patch("/api/user/slippage", slippage);
+      fetchData(); // refresh analytics with new slippage context
+    } catch (e) {}
+    setSlippageSaving(false);
+  };
 
   const fetchData = async () => {
     try {
@@ -245,6 +265,46 @@ export default function Analytics() {
             <span className="filters-label-icon">⏱</span>
             Analyse your strategies
           </div>
+
+          <div className="slippage-group">
+            <label>NIFTY ₹{slippage.nifty.toFixed(1)}/unit</label>
+            <input
+              type="range"
+              min="0"
+              max="5"
+              step="0.5"
+              value={slippage.nifty}
+              onChange={(e) =>
+                setSlippage((p) => ({ ...p, nifty: Number(e.target.value) }))
+              }
+            />
+          </div>
+
+          <div className="slippage-group">
+            <label>BANKNIFTY ₹{slippage.banknifty.toFixed(1)}/unit</label>
+            <input
+              type="range"
+              min="0"
+              max="5"
+              step="0.5"
+              value={slippage.banknifty}
+              onChange={(e) =>
+                setSlippage((p) => ({
+                  ...p,
+                  banknifty: Number(e.target.value),
+                }))
+              }
+            />
+          </div>
+
+          <button
+            className="save-slip-btn"
+            onClick={saveSlippage}
+            disabled={slippageSaving}
+          >
+            {slippageSaving ? "Saving..." : "Set Slippage"}
+          </button>
+
           <div className="date-group">
             <label>From</label>
             <input
@@ -279,7 +339,7 @@ export default function Analytics() {
           </div>
 
           <button
-            className="primary-btn apply-btn"
+            className="apply-btn"
             onClick={() => {
               if (!fromDate || !toDate) {
                 alert("Please select both From and To dates.");
@@ -289,7 +349,7 @@ export default function Analytics() {
               fetchData();
             }}
           >
-            Apply
+            Analyse
           </button>
         </div>
 
@@ -302,31 +362,54 @@ export default function Analytics() {
           </div>
         ) : (
           <>
-            {/* KPI */}
+            {/* ROW 1: PnL + Charges + ROI */}
             <div className="analytics-kpi-row">
-              <Card title="Total PnL" value={summary.totalPnl} money />
+              <Card title="Gross PnL" value={summary.grossPnl} money />
+              <Card
+                title="Brokerage"
+                value={summary.totalBrokerage}
+                money
+                light
+              />
+              <Card
+                title="STT, GST & Charges"
+                value={summary.totalCharges}
+                money
+                light
+              />
+              <Card
+                title="Slippage"
+                value={summary.totalSlippage}
+                money
+                light
+              />
+              <Card title="Net PnL" value={summary.totalPnl} money />
+              <Card
+                title="Daily ROI"
+                value={(summary.avgDailyRoi ?? 0) + "%"}
+              />
+              <Card
+                title="Weekly ROI"
+                value={(summary.avgWeeklyRoi ?? 0) + "%"}
+              />
+              <Card
+                title="Monthly ROI"
+                value={(summary.avgMonthlyRoi ?? 0) + "%"}
+              />
               <Card title="Trades" value={summary.totalTrades} />
+            </div>
+
+            {/* ROW 2: Win/Loss metrics + Streaks */}
+            <div className="analytics-kpi-row">
               <Card
                 title="Win Rate"
                 value={summary.winRate ? summary.winRate + "%" : "0%"}
               />
               <Card title="Max Win" value={summary.maxWin} money />
               <Card title="Max Loss" value={summary.maxLoss} money />
-              <Card title="Risk Consistency" value={getRiskConsistency()} />
-            </div>
-
-            {/* STREAK */}
-            <div className="analytics-kpi-row">
               <Card title="Max Win Streak" value={streak.maxWin} />
               <Card title="Max Loss Streak" value={streak.maxLoss} />
-              <CardMulti
-                title="Capital ROI"
-                lines={[
-                  `Daily: ${summary.avgDailyRoi ?? 0}%`,
-                  `Weekly: ${summary.avgWeeklyRoi ?? 0}%`,
-                  `Monthly: ${summary.avgMonthlyRoi ?? 0}%`,
-                ]}
-              />
+              <Card title="Risk Consistency" value={getRiskConsistency()} />
             </div>
 
             {/* CHARTS */}
@@ -557,6 +640,7 @@ export default function Analytics() {
                                         <th>Exit Value</th>
                                         <th>Brokerage</th>
                                         <th>Charges</th>
+                                        <th>Slippage</th>
                                         <th>Realised P&amp;L</th>
                                       </tr>
                                     </thead>
@@ -600,18 +684,42 @@ export default function Analytics() {
                                               ₹ {inr(qty * exit)}
                                             </td>
                                             <td data-label="Brokerage">
-                                              ₹ {inr((t.brokerageAmt || 0) / (t.legs?.length || 1))}
+                                              ₹{" "}
+                                              {inr(
+                                                (t.brokerageAmt || 0) /
+                                                  (t.legs?.length || 1),
+                                              )}
                                             </td>
                                             <td data-label="Charges">
-                                              ₹ {inr((t.chargesAmt || 0) / (t.legs?.length || 1))}
+                                              ₹{" "}
+                                              {inr(
+                                                (t.chargesAmt || 0) /
+                                                  (t.legs?.length || 1),
+                                              )}
+                                            </td>
+                                            <td data-label="Slippage">
+                                              ₹ {inr(t.slippageAmt || 0)}
                                             </td>
                                             <td
                                               data-label="Realised P&L"
                                               className={
-                                                (t.netPnlAfterCharges ?? pnl) >= 0 ? "profit" : "loss"
+                                                (t.netPnlAfterCharges ?? pnl) >=
+                                                0
+                                                  ? "profit"
+                                                  : "loss"
                                               }
                                             >
-                                              {(t.netPnlAfterCharges ?? pnl) >= 0 ? "+" : ""}₹ {inr(i === 0 ? (t.netPnlAfterCharges ?? pnl) : pnl)}
+                                              {(t.netPnlAfterCharges ?? pnl) >=
+                                              0
+                                                ? "+"
+                                                : ""}
+                                              ₹{" "}
+                                              {inr(
+                                                i === 0
+                                                  ? (t.netPnlAfterCharges ??
+                                                      pnl)
+                                                  : pnl,
+                                              )}
                                             </td>
                                           </tr>
                                         );
@@ -637,9 +745,15 @@ export default function Analytics() {
   );
 }
 
-function Card({ title, value, money }) {
+function Card({ title, value, money, light }) {
   const num = typeof value === "number" ? value : null;
-  const cls = money && num !== null ? (num >= 0 ? "profit" : "loss") : "";
+  const cls = light
+    ? "light-red"
+    : money && num !== null
+      ? num >= 0
+        ? "profit"
+        : "loss"
+      : "";
   const display =
     money && num !== null
       ? `${num < 0 ? "-" : ""}₹ ${Math.abs(num).toLocaleString("en-IN")}`
@@ -677,7 +791,12 @@ function CardMulti({ title, lines }) {
       {lines.map((l, i) => (
         <div
           key={i}
-          style={{ fontSize: "14px", fontWeight: 700, color: "#0f172a", lineHeight: "1.6" }}
+          style={{
+            fontSize: "14px",
+            fontWeight: 700,
+            color: "#0f172a",
+            lineHeight: "1.6",
+          }}
         >
           {l}
         </div>

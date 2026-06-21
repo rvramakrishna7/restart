@@ -15,7 +15,11 @@ const userSchema = new mongoose.Schema({
   strategy: {
     name: String,
     config: Object
-  }
+  },
+  slippage: {
+    nifty: { type: Number, default: 1.5 },
+    banknifty: { type: Number, default: 2.5 },
+  },
 
 }, { timestamps: true });
 

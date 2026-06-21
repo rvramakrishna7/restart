@@ -180,6 +180,37 @@ router.get("/status", auth, async (req, res) => {
 });
 
 // =====================
+// SLIPPAGE SETTINGS
+// =====================
+router.get("/slippage", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user).select("slippage");
+    res.json({
+      success: true,
+      data: {
+        nifty: user?.slippage?.nifty ?? 1.5,
+        banknifty: user?.slippage?.banknifty ?? 2.5,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.patch("/slippage", auth, async (req, res) => {
+  try {
+    const { nifty, banknifty } = req.body;
+    await User.findByIdAndUpdate(req.user, {
+      "slippage.nifty": Number(nifty),
+      "slippage.banknifty": Number(banknifty),
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// =====================
 // EXPORT
 // =====================
 module.exports = router;

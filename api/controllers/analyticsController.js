@@ -68,13 +68,10 @@ const getMargin = (trade) => {
   return 200000 * (trade.lots || 1);
 };
 
-// Get net PnL after charges (recalculates for old trades)
 const getNetPnl = (trade) => {
   const { brokerageAmt, otherCharges } = calcCharges(trade);
   const rawPnl = trade.totalPnl || trade.netPnl || 0;
-  // If brokerage was already deducted (new trades), netPnl is correct
   if ((trade.brokerage || 0) !== 0) return trade.netPnl || 0;
-  // Old trade: deduct recalculated charges from totalPnl
   return Number((rawPnl - brokerageAmt - otherCharges).toFixed(2));
 };
 
@@ -101,7 +98,8 @@ const dayKey = (d) => {
 };
 
 // Average of an array
-const avg = (arr) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+const avg = (arr) =>
+  arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
 // =====================
 // SUMMARY API
@@ -135,40 +133,76 @@ exports.getSummary = async (req, res) => {
       ? Number((winsArr.reduce((s, v) => s + v, 0) / winsArr.length).toFixed(2))
       : 0;
     const avgLoss = lossesArr.length
-      ? Number((lossesArr.reduce((s, v) => s + v, 0) / lossesArr.length).toFixed(2))
+      ? Number(
+          (lossesArr.reduce((s, v) => s + v, 0) / lossesArr.length).toFixed(2),
+        )
       : 0;
     const maxWin = winsArr.length ? Math.max(...winsArr) : 0;
     const maxLoss = lossesArr.length ? Math.min(...lossesArr) : 0;
+    const grossPnl = Number(
+      trades.reduce((s, t) => s + (t.totalPnl || 0), 0).toFixed(2),
+    );
+    const totalBrokerage = Number(
+      trades.reduce((s, t) => s + calcCharges(t).brokerageAmt, 0).toFixed(2),
+    );
+    const totalCharges = Number(
+  trades.reduce((s, t) => s + calcCharges(t).otherCharges, 0).toFixed(2),
+);
+    const totalSlippage = Number(trades.reduce((s, t) => s + (t.slippage || 0), 0).toFixed(2));
+    // ROI — capital = unique strategies deployed × ₹2L (₹5L for Iron Fly)
+    // Per period: unique strategy types × their margin = total capital for that period
 
-    // ROI by day / week / month
+    const getStrategyKey = (t) => {
+      const s = (t.strategy || "").toUpperCase();
+      if (s.includes("IRON")) return "IRON_FLY";
+      if (s.includes("STRADDLE")) return "STRADDLE";
+      if (s.includes("STRANGLE")) return "STRANGLE";
+      if (s.includes("DEBIT") || s.includes("BULL") || s.includes("BEAR"))
+        return "DEBIT_SPREAD";
+      return s;
+    };
+
+    const capitalForStrategies = (tradesInPeriod) => {
+      const seen = new Set(tradesInPeriod.map(getStrategyKey));
+      let capital = 0;
+      seen.forEach((s) => {
+        capital += s === "IRON_FLY" ? 500000 : 200000;
+      });
+      return capital;
+    };
+
+    // Daily ROI
     const dayMap = {};
     trades.forEach((t, i) => {
       const key = dayKey(t.exitTime);
-      if (!dayMap[key]) dayMap[key] = { pnl: 0, capital: 0 };
+      if (!dayMap[key]) dayMap[key] = { pnl: 0, trades: [] };
       dayMap[key].pnl += netPnls[i];
-      dayMap[key].capital += getMargin(t);
+      dayMap[key].trades.push(t);
     });
 
+    // Weekly ROI
     const weekMap = {};
     trades.forEach((t, i) => {
       const key = weekKey(t.exitTime);
-      if (!weekMap[key]) weekMap[key] = { pnl: 0, capital: 0 };
+      if (!weekMap[key]) weekMap[key] = { pnl: 0, trades: [] };
       weekMap[key].pnl += netPnls[i];
-      weekMap[key].capital += getMargin(t);
+      weekMap[key].trades.push(t);
     });
 
+    // Monthly ROI
     const monMap = {};
     trades.forEach((t, i) => {
       const key = monthKey(t.exitTime);
-      if (!monMap[key]) monMap[key] = { pnl: 0, capital: 0 };
+      if (!monMap[key]) monMap[key] = { pnl: 0, trades: [] };
       monMap[key].pnl += netPnls[i];
-      monMap[key].capital += getMargin(t);
+      monMap[key].trades.push(t);
     });
 
     const roiOf = (map) =>
-      Object.values(map).map((v) =>
-        v.capital ? Number(((v.pnl / v.capital) * 100).toFixed(2)) : 0
-      );
+      Object.values(map).map((v) => {
+        const capital = capitalForStrategies(v.trades);
+        return capital ? Number(((v.pnl / capital) * 100).toFixed(2)) : 0;
+      });
 
     const avgDailyRoi = Number(avg(roiOf(dayMap)).toFixed(2));
     const avgWeeklyRoi = Number(avg(roiOf(weekMap)).toFixed(2));
@@ -187,6 +221,10 @@ exports.getSummary = async (req, res) => {
         avgDailyRoi,
         avgWeeklyRoi,
         avgMonthlyRoi,
+        grossPnl,
+        totalBrokerage,
+        totalCharges,
+        totalSlippage,
       },
     });
   } catch (err) {
@@ -281,6 +319,7 @@ exports.getTradeHistory = async (req, res) => {
       const obj = t.toObject();
       obj.brokerageAmt = brokerageAmt;
       obj.chargesAmt = otherCharges;
+      obj.slippageAmt = t.slippage || 0;
       obj.netPnlAfterCharges = netPnlAfterCharges;
       return obj;
     });

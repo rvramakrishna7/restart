@@ -101,6 +101,7 @@ const TradeSchema = new mongoose.Schema(
     },
     lots: { type: Number, default: 1 },
     strategyType: { type: String, default: "" },
+    slippage: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

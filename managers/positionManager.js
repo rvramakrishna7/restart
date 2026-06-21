@@ -367,7 +367,6 @@ class PositionManager {
       const price = tick.last_price;
 
       for (let pos of this.positions) {
-        
         if (!pos._tokenTypeLogged && pos.buyToken) {
           pos._tokenTypeLogged = true;
           logger.log(
@@ -987,7 +986,7 @@ class PositionManager {
         // GST: 18% on (brokerage + exchange + sebi)
         const gst = 0.18 * (brokerageAmt + exchange + sebi);
         const otherCharges = Number(
-          (stt + exchange + sebi + gst + stamp).toFixed(2)
+          (stt + exchange + sebi + gst + stamp).toFixed(2),
         );
         return {
           brokerageAmt: Number(brokerageAmt.toFixed(2)),
@@ -997,7 +996,7 @@ class PositionManager {
 
       // Collect all legs including adjustment legs
       const _allLegs = [...legs];
-      for (const adj of (position.history || [])) {
+      for (const adj of position.history || []) {
         if (adj.legsAdded) _allLegs.push(...adj.legsAdded);
         if (adj.legsClosed) _allLegs.push(...adj.legsClosed);
       }
@@ -1011,8 +1010,35 @@ class PositionManager {
         ? { brokerageAmt: 0, otherCharges: 0 }
         : _calcCharges(_allLegs);
 
+      // Fetch user slippage settings
+      let slippagePerUnit = 0;
+      try {
+        const User = require("../api/models/User");
+        const tradeUser = await User.findById(position.userId).select(
+          "slippage",
+        );
+        const instrument = (position.index || "").toUpperCase();
+        if (instrument.includes("BANKNIFTY")) {
+          slippagePerUnit = tradeUser?.slippage?.banknifty ?? 2.5;
+        } else {
+          slippagePerUnit = tradeUser?.slippage?.nifty ?? 1.5;
+        }
+      } catch (e) {
+        slippagePerUnit = 1.5;
+      }
+
+      // Slippage = per unit × qty × 1 execution per leg (entry OR exit each counted once in _allLegs)
+      const slippageAmt = Number(
+        _allLegs
+          .reduce((sum, leg) => {
+            const qty = Number(leg.qty || 0);
+            return sum + slippagePerUnit * qty;
+          }, 0)
+          .toFixed(2),
+      );
+
       const finalNetPnl = Number(
-        (netPnl - brokerageAmt - otherCharges).toFixed(2)
+        (netPnl - brokerageAmt - otherCharges - slippageAmt).toFixed(2),
       );
 
       await Trade.create({
@@ -1032,6 +1058,7 @@ class PositionManager {
         totalPnl: netPnl,
         brokerage: brokerageAmt,
         charges: otherCharges,
+        slippage: slippageAmt,
         netPnl: finalNetPnl,
         lots: position.lots || 1,
         strategyType: position.strategyType || position.type || "",
