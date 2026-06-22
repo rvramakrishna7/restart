@@ -43,7 +43,7 @@ const calcCharges = (trade) => {
 
     brokerageAmt += 40; // ₹20 entry + ₹20 exit
     if (String(leg.type).startsWith("SELL")) {
-      stt += (0.15 / 100) * exitTurnover;
+      stt += Math.max(1, (0.1 / 100) * exitTurnover);
     }
     exchange += (0.03553 / 100) * (entryTurnover + exitTurnover);
     sebi += (10 / 1e7) * (entryTurnover + exitTurnover);
@@ -146,9 +146,11 @@ exports.getSummary = async (req, res) => {
       trades.reduce((s, t) => s + calcCharges(t).brokerageAmt, 0).toFixed(2),
     );
     const totalCharges = Number(
-  trades.reduce((s, t) => s + calcCharges(t).otherCharges, 0).toFixed(2),
-);
-    const totalSlippage = Number(trades.reduce((s, t) => s + (t.slippage || 0), 0).toFixed(2));
+      trades.reduce((s, t) => s + calcCharges(t).otherCharges, 0).toFixed(2),
+    );
+    const totalSlippage = Number(
+      trades.reduce((s, t) => s + (t.slippage || 0), 0).toFixed(2),
+    );
     // ROI — capital = unique strategies deployed × ₹2L (₹5L for Iron Fly)
     // Per period: unique strategy types × their margin = total capital for that period
 
@@ -207,6 +209,87 @@ exports.getSummary = async (req, res) => {
     const avgDailyRoi = Number(avg(roiOf(dayMap)).toFixed(2));
     const avgWeeklyRoi = Number(avg(roiOf(weekMap)).toFixed(2));
     const avgMonthlyRoi = Number(avg(roiOf(monMap)).toFixed(2));
+    // ── New metrics ──
+    const tradingDays = Object.keys(dayMap).length;
+    const tradingMonths = Object.keys(monMap).length;
+
+    const avgDayProfit = tradingDays
+      ? Number((totalPnl / tradingDays).toFixed(2))
+      : 0;
+    const avgMonthlyProfit = tradingMonths
+      ? Number((totalPnl / tradingMonths).toFixed(2))
+      : 0;
+
+    const lossRate = totalTrades
+      ? Number(((lossesArr.length / totalTrades) * 100).toFixed(2))
+      : 0;
+
+    // Expectancy ratio: >1 means strategy makes more than it loses per trade
+    const expectancy =
+      avgWin && avgLoss && totalTrades
+        ? Number(
+            (
+              (winsArr.length / totalTrades) * (avgWin / Math.abs(avgLoss)) -
+              lossesArr.length / totalTrades
+            ).toFixed(2),
+          )
+        : 0;
+
+    // Deployed capital = unique strategies across entire filtered period
+    const totalDeployedCapital = capitalForStrategies(trades);
+
+    const totalStrategies = new Set(trades.map(getStrategyKey)).size;
+
+    // Max Drawdown — using sorted daily cumulative PnL
+    const sortedDays = Object.keys(dayMap).sort();
+    let cumPnl = 0;
+    let peak = -Infinity;
+    let maxDrawdown = 0;
+    let peakDay = null;
+    let troughDay = null;
+    let tempPeakDay = null;
+
+    sortedDays.forEach((day) => {
+      cumPnl += dayMap[day].pnl;
+      if (cumPnl > peak) {
+        peak = cumPnl;
+        tempPeakDay = day;
+      }
+      const dd = cumPnl - peak;
+      if (dd < maxDrawdown) {
+        maxDrawdown = dd;
+        troughDay = day;
+        peakDay = tempPeakDay;
+      }
+    });
+    maxDrawdown = Number(maxDrawdown.toFixed(2));
+
+    // MDD Recovery — days from trough day until cumulative PnL exceeds peak again
+    let mddRecoveryDays = null;
+    if (troughDay && maxDrawdown < 0) {
+      let cum = 0;
+      let counting = false;
+      let dayCount = 0;
+      for (const day of sortedDays) {
+        cum += dayMap[day].pnl;
+        if (day === troughDay) {
+          counting = true;
+          dayCount = 0;
+        }
+        if (counting) {
+          dayCount++;
+          if (cum >= peak) {
+            mddRecoveryDays = dayCount;
+            break;
+          }
+        }
+      }
+    }
+
+    const returnToMddRatio =
+      maxDrawdown < 0
+        ? Number((totalPnl / Math.abs(maxDrawdown)).toFixed(2))
+        : null;
 
     res.json({
       success: true,
@@ -221,6 +304,15 @@ exports.getSummary = async (req, res) => {
         avgDailyRoi,
         avgWeeklyRoi,
         avgMonthlyRoi,
+        avgDayProfit,
+        avgMonthlyProfit,
+        lossRate,
+        expectancy,
+        totalDeployedCapital,
+        totalStrategies,
+        maxDrawdown,
+        mddRecoveryDays,
+        returnToMddRatio,
         grossPnl,
         totalBrokerage,
         totalCharges,

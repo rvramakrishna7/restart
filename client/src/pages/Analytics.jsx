@@ -364,6 +364,11 @@ export default function Analytics() {
           <>
             {/* ROW 1: PnL + Charges + ROI */}
             <div className="analytics-kpi-row">
+              <Card
+                title="Deployed Capital"
+                value={summary.totalDeployedCapital}
+                money
+              />
               <Card title="Gross PnL" value={summary.grossPnl} money />
               <Card
                 title="Brokerage"
@@ -384,6 +389,13 @@ export default function Analytics() {
                 light
               />
               <Card title="Net PnL" value={summary.totalPnl} money />
+              <Card title="Trades" value={summary.totalTrades} />
+              <Card title="Win Rate" value={(summary.winRate ?? 0) + "%"} />
+              <Card title="Loss Rate" value={(summary.lossRate ?? 0) + "%"} />
+            </div>
+
+            {/* ROW 2: Win/Loss + Streaks */}
+            <div className="analytics-kpi-row">
               <Card
                 title="Daily ROI"
                 value={(summary.avgDailyRoi ?? 0) + "%"}
@@ -396,22 +408,51 @@ export default function Analytics() {
                 title="Monthly ROI"
                 value={(summary.avgMonthlyRoi ?? 0) + "%"}
               />
-              <Card title="Trades" value={summary.totalTrades} />
-            </div>
-
-            {/* ROW 2: Win/Loss metrics + Streaks */}
-            <div className="analytics-kpi-row">
-              <Card
-                title="Win Rate"
-                value={summary.winRate ? summary.winRate + "%" : "0%"}
-              />
               <Card title="Max Win" value={summary.maxWin} money />
               <Card title="Max Loss" value={summary.maxLoss} money />
+              <Card title="Avg Win / Day" value={summary.avgWin} money />
               <Card title="Max Win Streak" value={streak.maxWin} />
+              <Card title="Avg Loss / Day" value={summary.avgLoss} money />
+
               <Card title="Max Loss Streak" value={streak.maxLoss} />
-              <Card title="Risk Consistency" value={getRiskConsistency()} />
             </div>
 
+            {/* ROW 3: Strategy + Drawdown + Expectancy */}
+            <div className="analytics-kpi-row">
+              <Card title="Avg Day Profit" value={summary.avgDayProfit} money />
+              <Card
+                title="Avg Monthly Profit"
+                value={summary.avgMonthlyProfit}
+                money
+              />
+
+              <Card
+                title="Max Drawdown"
+                value={summary.maxDrawdown !== 0 ? summary.maxDrawdown : null}
+                money
+                emptyText="No Drawdown"
+              />
+              <Card
+                title="MDD Recovery"
+                value={
+                  summary.maxDrawdown === 0
+                    ? "No Drawdown"
+                    : summary.mddRecoveryDays == null
+                      ? "Recovering"
+                      : summary.mddRecoveryDays + " days"
+                }
+              />
+              <Card
+                title="Return / MDD"
+                value={
+                  summary.returnToMddRatio ??
+                  (summary.maxDrawdown === 0 ? "No Drawdown" : "—")
+                }
+              />
+              <Card title="Risk Consistency" value={getRiskConsistency()} />
+              <Card title="Total Strategies" value={summary.totalStrategies} />
+              <Card title="Expectancy" value={summary.expectancy} />
+            </div>
             {/* CHARTS */}
             <div className="section-block">
               <h3 className="section-title">
@@ -745,7 +786,7 @@ export default function Analytics() {
   );
 }
 
-function Card({ title, value, money, light }) {
+function Card({ title, value, money, light, emptyText }) {
   const num = typeof value === "number" ? value : null;
   const cls = light
     ? "light-red"
@@ -755,9 +796,11 @@ function Card({ title, value, money, light }) {
         : "loss"
       : "";
   const display =
-    money && num !== null
-      ? `${num < 0 ? "-" : ""}₹ ${Math.abs(num).toLocaleString("en-IN")}`
-      : (value ?? 0);
+    value == null && emptyText
+      ? emptyText
+      : money && num !== null
+        ? `${num < 0 ? "-" : ""}₹ ${Math.abs(num).toLocaleString("en-IN")}`
+        : (value ?? 0);
   return (
     <div className="analytics-kpi-card">
       <div className="kpi-title">{title}</div>

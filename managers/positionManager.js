@@ -968,7 +968,7 @@ class PositionManager {
 
           // STT: 0.15% on sell-leg exit premium × qty only
           if (String(leg.type).startsWith("SELL")) {
-            stt += (0.15 / 100) * exitTurnover;
+            stt += Math.max(1, (0.1 / 100) * exitTurnover);
           }
 
           // Exchange NSE: 0.03553% on both entry and exit turnover

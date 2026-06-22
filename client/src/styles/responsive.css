@@ -640,6 +640,54 @@ canvas {
   .analytics-table-wrap .table .trade-detail-row td {
     padding: 0;
   }
+
+  /* ---- ANALYTICS FILTER BAR MOBILE ---- */
+  .analytics-filters {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Filters label hidden on mobile */
+  .analytics-filters .filters-label {
+    display: none;
+  }
+
+  /* Date groups full width — appear first */
+  .analytics-filters .date-group {
+    flex: 0 0 100%;
+    order: 1;
+  }
+
+  /* Strategy select full width — after dates */
+  .analytics-filters .date-group:last-of-type {
+    order: 2;
+  }
+
+  /* Slippage groups after strategy, 50% each */
+  .analytics-filters .slippage-group {
+    flex: 0 0 calc(50% - 5px);
+    min-width: 0;
+    order: 3;
+  }
+
+  .analytics-filters .slippage-group input[type="range"] {
+    width: 100%;
+  }
+
+  /* Set Slippage + Analyse buttons — same row, 50% each */
+  .analytics-filters .save-slip-btn {
+    flex: 0 0 calc(50% - 5px);
+    order: 4;
+    justify-content: center;
+  }
+
+  .analytics-filters .apply-btn {
+    flex: 0 0 calc(50% - 5px);
+    order: 4;
+    justify-content: center;
+  }
 }
 
 /* ===================== SMALL PHONE ≤ 480px ===================== */
