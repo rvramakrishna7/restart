@@ -536,6 +536,16 @@
   color: #dc2626;
 }
 
+.table td.profit {
+  color: #16a34a;
+  font-weight: 600;
+}
+.table td.loss {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+
 /* ================= TRADE DETAIL (expanded row) ================= */
 .trade-caret-cell {
   text-align: right;
@@ -611,6 +621,9 @@
   background: #fee2e2;
   color: #b91c1c;
 }
+
+.trade-detail-table td.profit { color: #16a34a; font-weight: 600; }
+.trade-detail-table td.loss { color: #dc2626; font-weight: 600; }
 
 /* ================= CALENDAR HEATMAP ================= */
 .zheat-scroll {

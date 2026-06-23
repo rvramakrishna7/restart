@@ -759,6 +759,7 @@ canvas {
   .analytics-table-wrap .table .trade-detail-table thead {
     display: none;
   }
+
   .analytics-table-wrap .table .trade-detail-table tbody {
     display: block;
     width: 100%;
@@ -768,13 +769,13 @@ canvas {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
-      "type     pnl"
-      "symbol   symbol"
-      "entry    exit"
-      "entryval exitval";
+      "type      pnl"
+      "symbol    symbol"
+      "entry     exit"
+      "brokerage stt"
+      "gst       slippage";
     column-gap: 12px;
-    row-gap: 6px;
-    position: relative;
+    row-gap: 8px;
     background: #f8fafc;
     border: 1px solid #eef2f7;
     border-radius: 12px;
@@ -794,135 +795,121 @@ canvas {
     padding: 0;
     white-space: normal;
     width: auto;
+    font-size: 12.5px;
+    color: #475569;
   }
 
-  /* Row 1: SELL/BUY badge (left) + PnL (right) */
+  /* Type badge + Realised P&L — Row 1 */
   .analytics-table-wrap .table .trade-detail-table td[data-label="Type"] {
     grid-area: type;
     align-self: center;
   }
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Type"]
-    .leg-badge {
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Type"] .leg-badge {
     padding: 4px 10px;
     font-size: 11px;
   }
-
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Realised P&L"] {
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Realised P&L"] {
     grid-area: pnl;
     align-self: center;
     text-align: right;
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 700;
   }
 
-  /* Row 2: Symbol, full width */
+  /* Symbol — Row 2, full width */
   .analytics-table-wrap .table .trade-detail-table td[data-label="Symbol"] {
     grid-area: symbol;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: #0f172a;
   }
 
-  /* Row 3: Entry / Exit */
+  /* Entry / Exit — Row 3 */
   .analytics-table-wrap .table .trade-detail-table td[data-label="Entry"] {
     grid-area: entry;
-    font-size: 12.5px;
-    color: #475569;
+    text-align: left;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Entry"]::before {
+    content: "Entry: ";
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 10.5px;
+    display: block;
   }
   .analytics-table-wrap .table .trade-detail-table td[data-label="Exit"] {
     grid-area: exit;
     text-align: right;
-    font-size: 12.5px;
-    color: #475569;
   }
-
-  /* Row 4: Entry Value / Exit Value */
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Entry Value"] {
-    grid-area: entryval;
-    font-size: 12.5px;
-    color: #94a3b8;
-  }
-  .analytics-table-wrap .table .trade-detail-table td[data-label="Exit Value"] {
-    grid-area: exitval;
-    text-align: right;
-    font-size: 12.5px;
-    color: #94a3b8;
-  }
-
-  /* Labels */
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Entry"]::before {
-    content: "Entry: ";
-    font-weight: 700;
-    color: #94a3b8;
-  }
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Exit"]::before {
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Exit"]::before {
     content: "Exit: ";
     font-weight: 700;
     color: #94a3b8;
-  }
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Entry Value"]::before {
-    content: "Entry Val: ";
-    font-weight: 700;
-    color: #94a3b8;
-  }
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Exit Value"]::before {
-    content: "Exit Val: ";
-    font-weight: 700;
-    color: #94a3b8;
+    font-size: 10.5px;
+    display: block;
   }
 
-  /* Hide Qty */
+  /* Brokerage / STT — Row 4 */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Brokerage"] {
+    grid-area: brokerage;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Brokerage"]::before {
+    content: "Brokerage: ";
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 10.5px;
+    display: block;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="STT + Charges"] {
+    grid-area: stt;
+    text-align: right;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="STT + Charges"]::before {
+    content: "STT + Charges: ";
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 10.5px;
+    display: block;
+  }
+
+  /* GST / Slippage — Row 5 */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="GST"] {
+    grid-area: gst;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="GST"]::before {
+    content: "GST: ";
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 10.5px;
+    display: block;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Slippage"] {
+    grid-area: slippage;
+    text-align: right;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Slippage"]::before {
+    content: "Slippage: ";
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 10.5px;
+    display: block;
+  }
+
+  /* Hide Lots and Qty on mobile — already visible via context */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Lots"],
   .analytics-table-wrap .table .trade-detail-table td[data-label="Qty"] {
     display: none;
+  }
+
+  /* P&L colors */
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Realised P&L"].profit {
+    color: #16a34a !important;
+  }
+  .analytics-table-wrap .table .trade-detail-table td[data-label="Realised P&L"].loss {
+    color: #dc2626 !important;
   }
 
   .analytics-table-wrap .trade-detail {
     padding: 8px 4px 4px;
     overflow-x: visible;
-  }
-  /* Fix: Entry was being center-aligned by an external rule */
-  .analytics-table-wrap .table .trade-detail-table td[data-label="Entry"] {
-    text-align: left !important;
-  }
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Entry Value"] {
-    text-align: left !important;
-  }
-
-  /* Fix: PnL color was being overridden by .trade-detail-table td color rule */
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Realised P&L"].profit {
-    color: #16a34a !important;
-  }
-  .analytics-table-wrap
-    .table
-    .trade-detail-table
-    td[data-label="Realised P&L"].loss {
-    color: #dc2626 !important;
   }
 }

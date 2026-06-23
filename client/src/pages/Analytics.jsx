@@ -644,8 +644,20 @@ export default function Analytics() {
                             <td>{new Date(t.exitTime).toLocaleDateString()}</td>
                             <td>{prettyStrategy(t.strategy)}</td>
                             <td>{t.instrument}</td>
-                            <td className={t.netPnl >= 0 ? "profit" : "loss"}>
-                              ₹ {t.netPnl}
+                            <td
+                              className={
+                                (t.netPnlAfterCharges ?? t.netPnl) >= 0
+                                  ? "profit"
+                                  : "loss"
+                              }
+                            >
+                              ₹{" "}
+                              {Number(
+                                t.netPnlAfterCharges ?? t.netPnl,
+                              ).toLocaleString("en-IN", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                             </td>
                             <td className="trade-caret-cell">
                               <span
@@ -674,13 +686,13 @@ export default function Analytics() {
                                       <tr>
                                         <th>Type</th>
                                         <th>Symbol</th>
+                                        <th>Lots</th>
                                         <th>Qty</th>
                                         <th>Entry</th>
-                                        <th>Entry Value</th>
                                         <th>Exit</th>
-                                        <th>Exit Value</th>
                                         <th>Brokerage</th>
-                                        <th>Charges</th>
+                                        <th>STT + Charges</th>
+                                        <th>GST</th>
                                         <th>Slippage</th>
                                         <th>Realised P&amp;L</th>
                                       </tr>
@@ -688,6 +700,7 @@ export default function Analytics() {
                                     <tbody>
                                       {t.legs?.map((l, i) => {
                                         const qty = Number(l.qty || 0);
+                                        const lots = t.lots || 1;
                                         const entry = Number(l.entryPrice || 0);
                                         const exit = Number(l.exitPrice || 0);
                                         const inr = (n) =>
@@ -698,7 +711,27 @@ export default function Analytics() {
                                               maximumFractionDigits: 2,
                                             },
                                           );
-                                        const pnl = Number(l.pnl || 0);
+                                        const grossPnl = Number(l.pnl || 0);
+                                        const legCount = t.legs?.length || 1;
+
+                                        const legBrokerage =
+                                          (t.brokerageAmt || 0) / legCount;
+                                        const totalLegCharges =
+                                          (t.chargesAmt || 0) / legCount;
+                                        const legGst = Number(
+                                          (legBrokerage * 0.18).toFixed(2),
+                                        );
+                                        const legSttCharges = Number(
+                                          (totalLegCharges - legGst).toFixed(2),
+                                        );
+                                        const legSlippage =
+                                          (t.slippageAmt || 0) / legCount;
+                                        const legNetPnl =
+                                          grossPnl -
+                                          legBrokerage -
+                                          totalLegCharges -
+                                          legSlippage;
+
                                         return (
                                           <tr key={i}>
                                             <td data-label="Type">
@@ -711,56 +744,35 @@ export default function Analytics() {
                                             <td data-label="Symbol">
                                               {formatSymbol(l.symbol)}
                                             </td>
+                                            <td data-label="Lots">{lots}</td>
                                             <td data-label="Qty">{qty}</td>
                                             <td data-label="Entry">
                                               ₹ {entry.toFixed(2)}
                                             </td>
-                                            <td data-label="Entry Value">
-                                              ₹ {inr(qty * entry)}
-                                            </td>
                                             <td data-label="Exit">
                                               ₹ {exit.toFixed(2)}
                                             </td>
-                                            <td data-label="Exit Value">
-                                              ₹ {inr(qty * exit)}
-                                            </td>
                                             <td data-label="Brokerage">
-                                              ₹{" "}
-                                              {inr(
-                                                (t.brokerageAmt || 0) /
-                                                  (t.legs?.length || 1),
-                                              )}
+                                              ₹ {inr(legBrokerage)}
                                             </td>
-                                            <td data-label="Charges">
-                                              ₹{" "}
-                                              {inr(
-                                                (t.chargesAmt || 0) /
-                                                  (t.legs?.length || 1),
-                                              )}
+                                            <td data-label="STT + Charges">
+                                              ₹ {inr(legSttCharges)}
+                                            </td>
+                                            <td data-label="GST">
+                                              ₹ {inr(legGst)}
                                             </td>
                                             <td data-label="Slippage">
-                                              ₹ {inr(t.slippageAmt || 0)}
+                                              ₹ {inr(legSlippage)}
                                             </td>
                                             <td
                                               data-label="Realised P&L"
                                               className={
-                                                (t.netPnlAfterCharges ?? pnl) >=
-                                                0
+                                                legNetPnl >= 0
                                                   ? "profit"
                                                   : "loss"
                                               }
                                             >
-                                              {(t.netPnlAfterCharges ?? pnl) >=
-                                              0
-                                                ? "+"
-                                                : ""}
-                                              ₹{" "}
-                                              {inr(
-                                                i === 0
-                                                  ? (t.netPnlAfterCharges ??
-                                                      pnl)
-                                                  : pnl,
-                                              )}
+                                              ₹ {inr(legNetPnl)}
                                             </td>
                                           </tr>
                                         );
