@@ -30,7 +30,7 @@
   letter-spacing: -0.2px;
 }
 
-/* ================= METRICS ROW (right side of header) ================= */
+/* ================= METRICS ROW  ================= */
 
 .payoff-metrics {
   display: flex;
@@ -42,7 +42,7 @@
   color: #64748b;
 }
 
-/* each metric div: "POP: <span>50.6%</span>" */
+
 .payoff-metrics > div {
   display: flex;
   align-items: center;
@@ -55,7 +55,7 @@
   color: #1e293b;
 }
 
-/* ── color classes used directly in JSX ── */
+/* ── color classes  ── */
 .payoff-metrics .green,
 .green {
   color: #059669 !important;

@@ -86,7 +86,7 @@ router.get("/", auth, ownerOnly, async (req, res) => {
 });
 
 // =====================
-// OWNER — toggle replied / save notes for one enquiry
+// OWNER — toggle replied 
 // PATCH /api/contact/:id
 // body: { replied?: boolean, notes?: string }
 // =====================

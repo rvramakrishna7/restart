@@ -72,7 +72,7 @@ function initWebSocket(accessToken, tokens, onTick) {
       const { updateTickMap } = require("./strategyControllerBridge");
       updateTickMap(ticks);
     } catch (err) {
-      // path resolved via bridge file — see note below
+      // path resolved via bridge file 
     }
 
     // 3. run all registered listeners (adjustment engine etc.)

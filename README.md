@@ -46,8 +46,7 @@ MongoDB (positions + trades, restored on restart)
 
 ## Strategies
 
-Debit spread (with loss-side strangle conversion and profit-side strike shifts),
-intraday straddle, intraday strangle, iron fly, and calendar spread.
+Debit spread, Intraday straddle, Intraday strangle, Iron fly, and Calendar spread.
 
 ## Getting started
 
@@ -73,7 +72,7 @@ npm start
 ## Engineering highlights
 - Real-time tick processing over a persistent broker WebSocket with reconnect + token resubscription.
 - Crash-safe state: open positions persist to MongoDB and restore on restart.
-- Rule-based adjustment engine (strike shifts, strangle conversion) running per-tick.
+- Rule-based adjustment engine (strike shifts) running per-tick.
 - Paper/live mode parity through a single execution path.
 - Secured API: JWT auth, per-user data scoping, rate-limiting, helmet.
 - Tested (Jest) and linted (ESLint + Prettier) with CI-ready scripts.

@@ -7,10 +7,7 @@ import "../styles/product.css";
 gsap.registerPlugin(ScrollTrigger);
 
 /*
- * Restart Options — Product page (route /product or /)
- * App-theme blue · stock-market themed · GSAP pinned scroll-story.
- * Desktop: pinned 3-act centerpiece (dashboard builds -> morphs to pipeline).
- * Mobile : NO pin — sections stack and fade up (fixes overlap + dead scroll).
+ * Restart Options — Product page 
  */
 
 const Typewriter = ({ text, speed = 60, onDone, className }) => {

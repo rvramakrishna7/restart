@@ -528,7 +528,7 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* KPI value can carry profit/loss colour on analytics cards */
+
 .analytics-kpi-card .kpi-value.profit {
   color: #16a34a;
 }

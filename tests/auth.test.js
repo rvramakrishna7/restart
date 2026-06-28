@@ -1,4 +1,4 @@
-// Provide env so config/env.js loads without exiting during tests.
+
 process.env.ZERODHA_API_KEY = "test";
 process.env.ZERODHA_API_SECRET = "test";
 process.env.MONGO_URI = "mongodb://localhost/test";

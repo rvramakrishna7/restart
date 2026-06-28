@@ -326,7 +326,7 @@ router.post("/preview-iron-fly", auth, async (req, res) => {
     const peSellPrem   = atmOption.PE || 0;
     const combined     = ceSellPrem + peSellPrem;
 
-    // ── check minimum combined premium ──
+    
     // ── check minimum combined premium ──
     const daysToExp   = Math.ceil((new Date(expiry) - new Date()) / (1000 * 60 * 60 * 24));
     const isWeekly    = !isBnf && daysToExp <= 8;

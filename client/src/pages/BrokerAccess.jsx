@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "../styles.css";
 
-// Email/CTA target for access requests — change to your real address.
+// Email/CTA target for access requests 
 const ACCESS_EMAIL = "access@restartoptions.com";
 
 const BrokerAccess = () => {

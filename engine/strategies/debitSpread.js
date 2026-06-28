@@ -10,7 +10,6 @@ const signed = (n) => (n >= 0 ? "+" : "") + money(n);
 // =====================================================================
 // DEBIT SPREAD ADJUSTMENT ENGINE
 // Bull Call Spread / Bear Put Spread
-// Extracted from adjustmentEngine.js — zero logic changes
 // =====================================================================
 
 function checkDebitSpread(position, currentPremium, pnl, optionChain, tickMap) {
@@ -62,7 +61,7 @@ function _checkDebitSpread(
     return;
   }
 
-  // log only every 30 seconds to avoid flooding terminal
+
   // log only every 30 seconds to avoid flooding terminal
   const now = Date.now();
   if (!position._lastLogTime || now - position._lastLogTime > 30000) {
@@ -79,7 +78,7 @@ function _checkDebitSpread(
       "| maxLoss:",
       position.originalMaxLoss.toFixed(2),
     );
-    // ── which side is monitoring ──
+    
     // ── which side is monitoring ──
     if (!position.lossAdjusted && !position.isStrangle) {
       const threshold = (position.entryPremium * 0.9).toFixed(2);
@@ -280,7 +279,7 @@ function _checkDebitSpread(
 
     const buyStrike = position.buyStrike;
 
-    // Use live WS tick price (currentPremium) as the current buy premium
+    // Using live WS tick price (currentPremium) as the current buy premium
     // NOT option chain LTP which can be stale on first fetch
     // currentPremium = position.currentBuyPrice set directly from Zerodha WS ticks
     const currentBuyPremium = currentPremium;
@@ -482,19 +481,19 @@ function _checkDebitSpread(
                 token: position.buyToken,
                 closedAt: new Date().toISOString(),
               });
-              position.closedBuyPrice = currentBuyPremium; // ✅ exit price of old leg
+              position.closedBuyPrice = currentBuyPremium; //  exit price of old leg
               position.buyStrike = otm50;
               position.buyToken = Number(
                 isBull ? next50.CE_token : next50.PE_token,
               );
-              position.buySymbol = isBull ? next50.CE_symbol : next50.PE_symbol; // ✅ new leg symbol
+              position.buySymbol = isBull ? next50.CE_symbol : next50.PE_symbol; // new leg symbol
               position.currentLegEntryPrice = otmTickPrice50;
-              // position.currentBuyPrice = otmTickPrice50;
-              position.buyAvgPrice = otmTickPrice50; // ✅ new leg entry for UI
+              
+              position.buyAvgPrice = otmTickPrice50; //  new leg entry for UI
               position.shiftCount += 1;
               return;
             }
-          } // end otmTickPrice50 check
+          } 
         }
       }
     }
@@ -585,30 +584,6 @@ function _checkDebitSpread(
   const ce = optionChain.find((o) => o.strike === position.CE_sell?.strike);
   const pe = optionChain.find((o) => o.strike === position.PE_sell?.strike);
 
-  // " STRANGLE CHECK | CE_sell:",
-  //   position.CE_sell?.strike,
-  //   "| PE_sell:",
-  //   position.PE_sell?.strike,
-  //   "| ce found:",
-  //   !!ce,
-  //   "| pe found:",
-  //   !!pe,
-  //   "| basePremium:",
-  //   position.basePremium,
-  // );
-
-  if (!ce || !pe) return;
-
-  // " STRANGLE PRICES | cePremium:",
-  //   ce.CE,
-  //   "| pePremium:",
-  //   pe.PE,
-  //   "| CE threshold:",
-  //   (position.basePremium * 1.05).toFixed(2),
-  //   "| PE threshold:",
-  //   (position.basePremium * 1.05).toFixed(2),
-  // );
-
   if (!ce || !pe) return;
   // ── cooldown: skip strangle check if adjustment fired within last 10 seconds ──
   if (
@@ -627,7 +602,6 @@ function _checkDebitSpread(
     return;
   }
 
-  // Rule 1/3: CE up 50% — adjust PE
   // Rule 1/3: CE up 50% — adjust PE
   if (cePremium >= position.basePremium * 1.15) {
     logger.log(

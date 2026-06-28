@@ -3,8 +3,6 @@ const Trade = require("../models/Trade");
 // =====================
 // HELPERS
 // =====================
-
-// Recalculate brokerage + charges from stored legs
 const calcCharges = (trade) => {
   const isIron =
     (trade.strategy || "").toUpperCase().includes("IRON") ||
@@ -18,7 +16,6 @@ const calcCharges = (trade) => {
     };
   }
 
-  // Old trade already has correct charges saved — use them
   if ((trade.brokerage || 0) !== 0) {
     return {
       brokerageAmt: trade.brokerage || 0,
@@ -26,7 +23,6 @@ const calcCharges = (trade) => {
     };
   }
 
-  // Recalculate from legs for old trades with brokerage=0
   const legs = trade.legs || [];
   let brokerageAmt = 0;
   let stt = 0;

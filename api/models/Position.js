@@ -91,8 +91,7 @@ const PositionSchema = new mongoose.Schema(
 
     // =====================
     // ADJUSTMENT STATE
-    // These MUST be persisted so on server restart the engine
-    // doesn't re-trigger adjustments that already happened
+    // Persisted so on server restart the engine doesn't re-trigger adjustments that already happened
     // =====================
     lossAdjusted: { type: Boolean, default: false },
     buyClosed: { type: Boolean, default: false },

@@ -113,7 +113,7 @@ const ExecutionPanel = ({ triggerRefresh, strategyType }) => {
       const data = res.data?.data || [];
       setEvents(data);
 
-      // toast any event we haven't shown yet (skip first load to avoid a flood)
+      // toast any event not shown yet (skip first load to avoid a flood)
       if (seenEventsRef.current.size === 0) {
         data.forEach((e) => seenEventsRef.current.add(`${e.time}-${e.type}`));
         return;

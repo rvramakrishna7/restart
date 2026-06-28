@@ -1,7 +1,4 @@
-/* =====================================================================
-   CONTACT PAGE  (route /contact) — APPEND this block to the END of
-   your existing client/src/styles/product.css. Uses the same rp- theme.
-   ===================================================================== */
+
 .rp-contact { padding: 80px 7vw 110px; min-height: 70vh; }
 .rp-contact-grid {
   max-width: 1080px; margin: 0 auto;

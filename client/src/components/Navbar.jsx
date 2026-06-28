@@ -125,8 +125,7 @@ const Navbar = () => {
         return;
       }
 
-      // Only the owner account can connect a live broker (also enforced on
-      // the backend). Everyone else sees the beta page.
+      // Only the owner account can connect a live broker (also enforced the backend). 
       const ownerEmail = process.env.REACT_APP_OWNER_EMAIL || "test@gmail.com";
       if (localStorage.getItem("email") !== ownerEmail) {
         setLoading(false);
@@ -201,11 +200,7 @@ const Navbar = () => {
             className={`market-item ${niftyChange.change >= 0 ? "up" : "down"}`}
           >
             <b>NIFTY</b> {market.nifty ? Math.round(market.nifty) : "--"}
-            {/* <small>
-              {market.nifty
-                ? `${niftyChange.change >= 0 ? " ▲" : " ▼"} ${niftyChange.percent.toFixed(2)}%`
-                : ""}
-            </small> */}
+            
           </span>
 
           {/* BANKNIFTY */}
@@ -214,11 +209,7 @@ const Navbar = () => {
           >
             <b>BANKNIFTY</b>{" "}
             {market.banknifty ? Math.round(market.banknifty) : "--"}
-            {/* <small>
-              {market.banknifty
-                ? `${bankChange.change >= 0 ? " ▲" : " ▼"} ${bankChange.percent.toFixed(2)}%`
-                : ""}
-            </small> */}
+           
           </span>
 
           {/* STATUS */}

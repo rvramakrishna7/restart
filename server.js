@@ -72,9 +72,6 @@ async function startGlobalWS() {
   try {
     console.log("🌐 Starting Global WebSocket...");
 
-    // ⚠️ you need ANY valid accessToken
-    // for now use first user OR env token
-
     const User = require("./api/models/User");
 
     const users = await User.find({

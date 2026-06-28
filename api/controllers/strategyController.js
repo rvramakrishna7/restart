@@ -94,7 +94,7 @@ exports.executeStrategy = async (req, res) => {
       });
     }
 
-    // adjustment engine runs via positionManager.handleTicks  updatePremium on every tick
+    
 
     // save trade record
     try {
@@ -224,8 +224,6 @@ exports.exitAll = async (req, res) => {
 
 // =====================
 // ENGINE EVENTS (safe, user-facing) — for toasts + activity timeline
-// Reads position.history[] and maps internal types to friendly messages.
-// Never exposes thresholds, strikes, or strategy parameters.
 // =====================
 const EVENT_LABELS = {
   STRADDLE_TO_STRANGLE: "Position adjusted — converted to strangle",
@@ -502,7 +500,7 @@ exports.exitSingle = async (req, res) => {
         }
       }
 
-      // ── CRITICAL FIX: purge fully-closed positions from in-memory array ──
+      // ── CRITICAL 
       // Without this, getPaperPositions returns stale closed legs alongside new spread
       // positionManager.positions is the live array — filter it directly
       const mgr = require("../../managers/positionManagerInstance");

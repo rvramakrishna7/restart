@@ -1,7 +1,4 @@
-/* =====================================================================
-   RESPONSIVE — consolidated breakpoints (imported LAST so it overrides)
-   Breakpoints: 1024 (tablet) · 768 (mobile) · 480 (small phone)
-   ===================================================================== */
+
 
 html {
   overflow-x: hidden;
@@ -53,14 +50,10 @@ canvas {
   }
 
   /* =========================================================
-     NAVBAR — Option A
+     NAVBAR — 
      Row 1: logo (left)  ↔  broker + logout (right)
      Row 2: nav links
      Row 3: market box
-     Technique: dissolve .nav-left & .nav-right with display:contents
-     so logo / links / market / broker / logout are all direct flex
-     children of .navbar. Then order + 100% flex-basis force the
-     wrap points exactly where we want.
      ========================================================= */
   .navbar {
     height: auto;
@@ -90,8 +83,7 @@ canvas {
     height: 20px;
   } /* smaller logo square */
 
-  /* Row 1 MIDDLE: broker box — compact, fixed-ish, sits between logo & logout.
-     Label is now short ("Broker: Live" / "Broker: Off") so it always fits. */
+  /* Row 1 MIDDLE: broker box — compact, fixed-ish, sits between logo & logout. */
   .broker-box {
     order: 2;
     flex: 0 0 auto;
@@ -286,7 +278,6 @@ canvas {
      Line 1: ① Ticker (left, bold)        ↔  P&L (right, colored)
      Line 2: Trade · Lots · Qty           ↔  Points (right, colored)
      Line 3: Entry → LTP                  ↔  time / status (right)
-     Built purely from the existing <td>s via grid placement.
      ========================================================= */
   .execution-table {
     overflow: visible;

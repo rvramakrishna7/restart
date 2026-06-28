@@ -1,6 +1,5 @@
 /* ================= BROKER ACCESS / INVITE PAGE ================= */
-/* Spacing is fluid (clamp + vh) so the card fits one screen without
-   scrolling on both tall desktops and short mobile viewports. */
+
 
 .ba-page {
   min-height: 100vh;
@@ -14,7 +13,7 @@
   overflow: hidden;
 }
 
-/* Subtle grid + radial fade (matches landing / auth) */
+/* Subtle grid + radial fade */
 .ba-page::before {
   content: "";
   position: absolute;

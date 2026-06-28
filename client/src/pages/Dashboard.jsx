@@ -41,8 +41,7 @@ const Dashboard = () => {
       navigate("/login");
       return;
     }
-    // Only the owner account can connect a live broker (also enforced on the
-    // backend). Everyone else sees the beta page.
+    // Only the owner account can connect a live broker (also enforced on the backend).
     const ownerEmail = process.env.REACT_APP_OWNER_EMAIL || "test@gmail.com";
     if (localStorage.getItem("email") !== ownerEmail) {
       navigate("/broker-access");

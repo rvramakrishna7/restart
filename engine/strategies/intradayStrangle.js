@@ -53,7 +53,8 @@ function _evaluateStrangle(position, currentFuturePrice, _pnl, chain) {
       `⏳ STRANGLE: need 2 open legs, found ${open.length} — skipping`,
     );
     return;
-  } // need exactly 2 open legs to evaluate
+  } 
+  // need exactly 2 open legs to evaluate
 
   const ceLeg = open.find((l) => l.type === "CE");
   const peLeg = open.find((l) => l.type === "PE");
