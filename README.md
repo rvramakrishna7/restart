@@ -1,5 +1,9 @@
 # Restart Options Trading Engine
 
+https://canva.link/restartoptions
+
+## Deployment : https://restartoptions.vercel.app
+
 An automated options trading engine for NIFTY and BANKNIFTY index options. It
 executes multi-leg option strategies, monitors them tick-by-tick over a live
 broker WebSocket, and runs rule-based adjustments (strike shifts, strangle
@@ -50,35 +54,21 @@ intraday straddle, intraday strangle, iron fly, and calendar spread.
 ### Backend
 
 ```bash
-cp .env.example .env      # then fill in real values
+cp .env.example .env      
 npm install
-npm run dev               # nodemon, or: npm start
+npm run dev               
 ```
 
 ### Frontend
 
 ```bash
 cd client
-cp .env.example .env      # set REACT_APP_API_URL
+cp .env.example .env      
 npm install
 npm start
 ```
 
-## Environment variables
 
-Backend (`.env`): `ZERODHA_API_KEY`, `ZERODHA_API_SECRET`, `MONGO_URI`,
-`JWT_SECRET`, `PORT`, `NODE_ENV`, `FRONTEND_URL`.
-
-Frontend (`client/.env`): `REACT_APP_API_URL`.
-
-## Deployment
-
-- **Backend:** Render (or any Node host). Set the env vars above in the host's
-  dashboard. Health check: `GET /`.
-- **Frontend:** Vercel. Set `REACT_APP_API_URL` to the deployed backend URL.
-
-After deploy, set the broker OAuth redirect URL in the Kite developer console to
-`<backend-url>/api/user/broker/zerodha/callback`.
 
 ## Engineering highlights
 - Real-time tick processing over a persistent broker WebSocket with reconnect + token resubscription.

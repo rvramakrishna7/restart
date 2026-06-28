@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// Backend base URL comes from the environment so the same build works
-// locally and in production. See client/.env.example.
+
 const instance = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000",
 });

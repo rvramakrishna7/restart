@@ -24,7 +24,7 @@ function initWebSocket(accessToken, tokens, onTick) {
   }
 
   if (!accessToken) {
-    logger.log("❌ No valid Zerodha session found → WS not started");
+    logger.log("❌ No valid broker session found → WS not started");
     return false;
   }
 
@@ -41,8 +41,8 @@ function initWebSocket(accessToken, tokens, onTick) {
     global._marketErrorLogged   = false;
 
     const INDEX_TOKENS = [256265, 260105];
-    // ALWAYS subscribe on connect — this is the only moment the socket is
-    // guaranteed open. Runs on first connect AND every reconnect, so the
+    // Always subscribe on connect — this is the only moment the socket is guaranteed open. 
+    // Runs on first connect AND every reconnect, so the
     // index tokens can never be silently dropped.
     const finalTokens = [...new Set([...(currentTokens || []), ...(tokens || []), ...INDEX_TOKENS])];
 
