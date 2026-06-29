@@ -668,14 +668,14 @@ canvas {
   }
 
   /* Set Slippage + Analyse buttons — same row, 50% each */
-  .analytics-filters .save-slip-btn {
+  /* .analytics-filters .save-slip-btn {
     flex: 0 0 calc(50% - 5px);
     order: 4;
     justify-content: center;
-  }
+  } */
 
   .analytics-filters .apply-btn {
-    flex: 0 0 calc(50% - 5px);
+    flex: 0 0 calc(100%);
     order: 4;
     justify-content: center;
   }

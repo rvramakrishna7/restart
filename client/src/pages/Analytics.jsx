@@ -266,7 +266,7 @@ export default function Analytics() {
             Analyse your strategies
           </div>
 
-          <div className="slippage-group">
+          {/* <div className="slippage-group">
             <label>NIFTY ₹{slippage.nifty.toFixed(1)}/unit</label>
             <input
               type="range"
@@ -303,7 +303,7 @@ export default function Analytics() {
             disabled={slippageSaving}
           >
             {slippageSaving ? "Saving..." : "Set Slippage"}
-          </button>
+          </button> */}
 
           <div className="date-group">
             <label>From</label>
