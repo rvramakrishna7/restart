@@ -61,7 +61,6 @@ function _checkDebitSpread(
     return;
   }
 
-
   // log only every 30 seconds to avoid flooding terminal
   const now = Date.now();
   if (!position._lastLogTime || now - position._lastLogTime > 30000) {
@@ -78,7 +77,7 @@ function _checkDebitSpread(
       "| maxLoss:",
       position.originalMaxLoss.toFixed(2),
     );
-    
+
     // ── which side is monitoring ──
     if (!position.lossAdjusted && !position.isStrangle) {
       const threshold = (position.entryPremium * 0.9).toFixed(2);
@@ -142,6 +141,7 @@ function _checkDebitSpread(
   }
 
   const tolerance = position.index === "BANKNIFTY" ? 10 : 5;
+  const conversionTolerance = position.index === "BANKNIFTY" ? 20 : 15;
 
   // =============================
   // FINAL RISK EXIT
@@ -164,7 +164,7 @@ function _checkDebitSpread(
       logger.log("⚠️ LOSS SIDE TRIGGERED (50%)");
 
       position.lossAdjusted = true;
-      position.isStrangle = true;
+      // position.isStrangle = true;
 
       // ── use current live sell leg LTP not original entry price ──
       const sellPremium = position.currentSellPrice || position.sellPremium;
@@ -177,7 +177,7 @@ function _checkDebitSpread(
         const premium = position.type === "BULL_CALL" ? option.PE : option.CE;
         const diff = Math.abs(premium - sellPremium);
 
-        if (diff < closestDiff && diff <= tolerance) {
+        if (diff < closestDiff && diff <= conversionTolerance) {
           closestDiff = diff;
           oppositeLeg = {
             strike: option.strike,
@@ -194,11 +194,14 @@ function _checkDebitSpread(
           "⚠️ LOSS CONVERSION FAILED — no opposite leg found within tolerance | sellPremium:",
           sellPremium,
         );
+        position.lossAdjusted = false; // reset so it retries next tick
         return;
       }
 
       // exit buy leg — save exit price so UI can freeze the LTP
+      position.isStrangle = true;
       position.closedBuyPrice = currentBuyPremium;
+
       position.buyQty = 0;
       position.buyClosed = true;
       position.closedBuyAt = new Date().toISOString();
@@ -238,7 +241,9 @@ function _checkDebitSpread(
         ? position.type === "BULL_CALL"
           ? currentCE.CE
           : currentCE.PE
-        : position.sellPremium;
+        : position.currentSellPrice ||
+          position.sellPremium ||
+          oppositeLeg.premium;
 
       logger.log("✅ Converted to Strangle (Loss Recovery)");
       logger.log("POSITION STATE:", {
@@ -488,12 +493,12 @@ function _checkDebitSpread(
               );
               position.buySymbol = isBull ? next50.CE_symbol : next50.PE_symbol; // new leg symbol
               position.currentLegEntryPrice = otmTickPrice50;
-              
+
               position.buyAvgPrice = otmTickPrice50; //  new leg entry for UI
               position.shiftCount += 1;
               return;
             }
-          } 
+          }
         }
       }
     }
