@@ -1,6 +1,6 @@
 # Restart Options Trading Engine
 
-https://canva.link/restartoptions
+https://www.youtube.com/watch?v=0bvLObxneBU
 
 ## Deployment : https://restartoptions.vercel.app
 
